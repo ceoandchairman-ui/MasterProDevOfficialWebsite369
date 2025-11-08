@@ -5,6 +5,7 @@ import ServicesSection from '../components/home/ServicesSection';
 import ConsultantsSection from '../components/home/ConsultantsSection';
 import ReviewsSection from '../components/home/ReviewsSection';
 import PostYourRatingSection from '../components/home/PostYourRatingSection';
+import BecomeConsultantSection from '../components/home/BecomeConsultantSection';
 import ContactSection from '../components/home/ContactSection';
 import WaveSeparator from '../components/shared/WaveSeparator';
 import UserIntentDialog from '../components/shared/UserIntentDialog';
@@ -17,6 +18,7 @@ const flatteryMessages = {
     '#consultants': "Connecting with experts. A smart move to accelerate your growth.",
     '#reviews': "Witnessing success stories. You're visualizing your own bright future.",
     '#post-rating': "Your voice matters ⭐ — share your career journey insights with us!",
+    '#become-consultant': "Ready to share your expertise? Leaders like you shape the future.",
     '#contact': "You've reached the final step. Your dedication is remarkable.",
   },
   business: {
@@ -25,6 +27,7 @@ const flatteryMessages = {
     '#consultants': "You're assessing the talent. That's a key leadership trait.",
     '#reviews': "Reviewing past results is a wise strategy for future partnerships.",
     '#post-rating': "Your voice matters ⭐ — help other businesses by sharing your experience!",
+    '#become-consultant': "Join our elite network! Your expertise can transform businesses.",
     '#contact': "Ready to take action. Your decisiveness will drive your business to new heights.",
   },
   other: {
@@ -33,6 +36,7 @@ const flatteryMessages = {
     '#consultants': "You have a keen eye for talent and expertise!",
     '#reviews': "It's always insightful to learn from the experiences of others.",
     '#post-rating': "Your voice matters ⭐ — share it with us!",
+    '#become-consultant': "Thinking of joining us? That's an exciting opportunity to explore!",
     '#contact': "You've explored everything! Your thoroughness is impressive.",
   }
 };
@@ -62,6 +66,11 @@ const sectionConfig = {
     containerColor: '#DCFCE7',
     emojiPosition: 'right',
     emojiType: 'female'
+  },
+  '#become-consultant': {
+    containerColor: '#ede7f6',
+    emojiPosition: 'left',
+    emojiType: 'male'
   },
   '#contact': { 
     containerColor: '#f3e5f5',
@@ -101,7 +110,7 @@ export default function Home() {
   const wavePermutations = useMemo(() => {
     const allPermutations = generateAllPermutations(brandColors);
     const shuffledPermutations = shuffle(allPermutations);
-    return shuffledPermutations.slice(0, 6); 
+    return shuffledPermutations.slice(0, 7); 
   }, []);
 
   useEffect(() => {
@@ -233,6 +242,19 @@ export default function Home() {
       <PostYourRatingSection />
       
       <FlatteryMessage 
+        message={flatteryMessages[userIntent]?.['#become-consultant']} 
+        isVisible={waveMessageStates['#become-consultant']?.isVisible || false}
+        hasAnimated={waveMessageStates['#become-consultant']?.hasAnimated || false}
+        containerColor={sectionConfig['#become-consultant'].containerColor}
+        emojiPosition={sectionConfig['#become-consultant'].emojiPosition}
+        emojiType={sectionConfig['#become-consultant'].emojiType}
+      />
+      <div ref={el => waveRefs.current['#become-consultant'] = el}>
+        <WaveSeparator colors={wavePermutations[5]} />
+      </div>
+      <BecomeConsultantSection />
+      
+      <FlatteryMessage 
         message={flatteryMessages[userIntent]?.['#contact']} 
         isVisible={waveMessageStates['#contact']?.isVisible || false}
         hasAnimated={waveMessageStates['#contact']?.hasAnimated || false}
@@ -241,7 +263,7 @@ export default function Home() {
         emojiType={sectionConfig['#contact'].emojiType}
       />
       <div ref={el => waveRefs.current['#contact'] = el}>
-        <WaveSeparator colors={wavePermutations[5]} />
+        <WaveSeparator colors={wavePermutations[6]} />
       </div>
       <ContactSection />
     </div>
