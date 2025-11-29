@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Mic, MicOff, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { X, Send, Mic, MicOff, ThumbsUp, ThumbsDown, Sparkles, MessageCircle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Service } from '@/entities/Service';
 import { Consultant } from '@/entities/Consultant';
@@ -11,7 +10,7 @@ export default function FloatingChatbot() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hi there! I'm your MasterProDev AI assistant. I can help you learn about our AI services, connect you with our expert consultants, or answer questions about career development and business growth. How can I assist you today? 🤖",
+      text: "Hi there! 👋 I'm your MasterProDev AI assistant. How can I help you today?",
       isBot: true,
       timestamp: new Date()
     }
@@ -38,6 +37,7 @@ export default function FloatingChatbot() {
   const [bubbleMessage, setBubbleMessage] = useState('');
   const [isHovering, setIsHovering] = useState(false);
   
+  const messagesEndRef = useRef(null);
   const idleTimer20Ref = useRef(null);
   const idleTimer45Ref = useRef(null);
   const bubbleHideTimerRef = useRef(null);
@@ -49,10 +49,15 @@ export default function FloatingChatbot() {
 
   // Bubble messages based on timing
   const bubbleMessages = {
-    initial: "Hi there 👋 Need help navigating or choosing a service?",
-    idle20s: "Looks like you're exploring — need help optimizing your journey?",
-    idle45s: "Ask me anything — I'm here to assist you 📌"
+    initial: "Hi there 👋 Need help?",
+    idle20s: "Exploring? I can help! 🧭",
+    idle45s: "Ask me anything 📌"
   };
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   // Fetch services and consultants data on mount
   useEffect(() => {
@@ -84,7 +89,6 @@ export default function FloatingChatbot() {
     updateCurrentPage();
     window.addEventListener('popstate', updateCurrentPage);
 
-    // Track time spent on page
     pageTimerRef.current = setInterval(() => {
       setPageTimeSpent(prev => prev + 1);
     }, 1000);
@@ -100,10 +104,10 @@ export default function FloatingChatbot() {
     if (hasOfferedProactiveHelp || isOpen) return;
 
     const proactiveMessages = {
-      'HireConsultant': { time: 30, message: "Looking for the right consultant? I can help you find the perfect match for your needs! 🎯" },
-      'ServicesPage': { time: 25, message: "Exploring our services? Let me help you find the best solution for your goals! 💡" },
-      'ContactPage': { time: 20, message: "Have questions before reaching out? I'm here to help! 📬" },
-      'TellYourIdeaPage': { time: 15, message: "Need help articulating your idea? I can guide you through it! ✨" }
+      'HireConsultant': { time: 30, message: "Need help finding a consultant? 🎯" },
+      'ServicesPage': { time: 25, message: "Questions about our services? 💡" },
+      'ContactPage': { time: 20, message: "I can answer questions first! 📬" },
+      'TellYourIdeaPage': { time: 15, message: "Let me help with your idea! ✨" }
     };
 
     const pageConfig = proactiveMessages[currentPage];
@@ -127,7 +131,6 @@ COMPANY OVERVIEW:
 - Email: masterprodevconsultant@outlook.com
 - Location: Toronto, ON, Canada
 - Mission: Empower professionals and businesses through AI transformation
-- Tagline: "Elevating Your Professional Journey"
 
 OUR SERVICES (REAL-TIME DATA):
 ${servicesList || 'No services available at the moment.'}
@@ -137,16 +140,12 @@ ${consultantsList || 'No consultants available at the moment.'}
 
 USER CONTEXT:
 - Currently viewing: ${currentPage} page
-- Time on page: ${pageTimeSpent} seconds
 
-YOUR ROLE AS THE CHATBOT:
-- Answer questions about MasterProDev's services and offerings using the REAL data above
-- Recommend specific consultants based on user needs
-- Guide users to the right service or consultant for their needs
-- Help users navigate the website and find relevant information
-- Qualify leads and direct them to contact forms or consultation bookings
-- Always be professional, helpful, and sales-oriented (but not pushy)
-- When recommending consultants, mention their name, expertise, and hourly rate
+YOUR ROLE:
+- Be concise and helpful
+- Recommend specific consultants when relevant
+- Guide users to the right service
+- Keep responses brief but informative
 `;
   };
 
@@ -165,22 +164,9 @@ YOUR ROLE AS THE CHATBOT:
         const { formData, uploadedFiles, metadata } = event.detail;
         setContextData({ formData, uploadedFiles, metadata });
         
-        let contextMessage = `Great! I received your submission`;
-        
-        if (formData.ideaTitle) {
-          contextMessage += ` about "${formData.ideaTitle}"`;
-        }
-        
-        if (uploadedFiles && uploadedFiles.length > 0) {
-          const fileTypes = uploadedFiles.map(f => f.isRecording ? 'voice note' : 'file').join(', ');
-          contextMessage += `. I see you've shared ${uploadedFiles.length} ${uploadedFiles.length === 1 ? 'item' : 'items'} (${fileTypes})`;
-        }
-        
-        if (formData.externalLink) {
-          contextMessage += `, plus an external link`;
-        }
-        
-        contextMessage += `. Let me help you develop this further. What specific aspect would you like to explore first?`;
+        let contextMessage = `Got your submission`;
+        if (formData.ideaTitle) contextMessage += ` about "${formData.ideaTitle}"`;
+        contextMessage += `. What would you like to explore?`;
         
         setMessages(prev => [...prev, {
           id: Date.now(),
@@ -215,62 +201,37 @@ YOUR ROLE AS THE CHATBOT:
 
     try {
       const siteContext = buildDynamicContext();
-      let prompt = '';
-      
-      // Build conversation history for context
       const recentMessages = messages.slice(-6).map(m => 
         `${m.isBot ? 'Assistant' : 'User'}: ${m.text}`
       ).join('\n');
       
-      if (contextData) {
-        const { formData, uploadedFiles } = contextData;
-        
-        prompt = `${siteContext}
-
-CONTEXT FROM USER'S FORM SUBMISSION:
-- Idea Title: ${formData?.ideaTitle || 'None'}
-- External Link: ${formData?.externalLink || 'None'}
-- Files Uploaded: ${uploadedFiles?.length || 0} files
-- Contact Info: ${formData?.email || 'Not provided'}, ${formData?.phone || 'Not provided'}
+      let prompt = `${siteContext}
 
 RECENT CONVERSATION:
 ${recentMessages}
 
-USER'S CURRENT MESSAGE: ${inputMessage}
+USER'S MESSAGE: ${inputMessage}
 
-Respond as MasterProDev's AI assistant. Reference their submitted information and guide them toward our services or consultants that can help. Use the real consultant and service data provided.`;
-      } else {
-        prompt = `${siteContext}
-
-RECENT CONVERSATION:
-${recentMessages}
-
-USER'S CURRENT MESSAGE: ${inputMessage}
-
-Respond as MasterProDev's AI assistant. Provide helpful information about our services and guide the user toward solutions we offer. Use the real consultant and service data provided when relevant.`;
-      }
+Respond helpfully and concisely.`;
 
       const response = await base44.integrations.Core.InvokeLLM({
         prompt: prompt,
         add_context_from_internet: false
       });
 
-      const botMessage = {
+      setMessages(prev => [...prev, {
         id: Date.now() + 1,
         text: response,
         isBot: true,
         timestamp: new Date()
-      };
-
-      setMessages(prev => [...prev, botMessage]);
+      }]);
     } catch (error) {
-      const errorMessage = {
+      setMessages(prev => [...prev, {
         id: Date.now() + 1,
-        text: "I apologize, but I'm experiencing technical difficulties. Please try again or contact us directly at masterprodevconsultant@outlook.com",
+        text: "Sorry, I'm having trouble right now. Please try again or email masterprodevconsultant@outlook.com",
         isBot: true,
         timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      }]);
     }
 
     setIsLoading(false);
@@ -285,7 +246,7 @@ Respond as MasterProDev's AI assistant. Provide helpful information about our se
 
   const toggleVoice = () => {
     if (!('webkitSpeechRecognition' in window)) {
-      alert('Speech recognition not supported in this browser');
+      alert('Speech recognition not supported');
       return;
     }
 
@@ -301,54 +262,30 @@ Respond as MasterProDev's AI assistant. Provide helpful information about our se
 
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
-    
-    recognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setInputMessage(transcript);
-    };
-
+    recognition.onresult = (event) => setInputMessage(event.results[0][0].transcript);
     recognition.start();
   };
 
-  // Show bubble with auto-hide timer
   const showBubbleWithMessage = (message, duration = 6000) => {
     setBubbleMessage(message);
     setShowBubble(true);
     
-    if (bubbleHideTimerRef.current) {
-      clearTimeout(bubbleHideTimerRef.current);
-    }
+    if (bubbleHideTimerRef.current) clearTimeout(bubbleHideTimerRef.current);
     
     bubbleHideTimerRef.current = setTimeout(() => {
-      if (!isHovering && !isOpen) {
-        setShowBubble(false);
-      }
+      if (!isHovering && !isOpen) setShowBubble(false);
     }, duration);
   };
 
-  // Handle mouse enter
-  const handleMouseEnter = () => {
-    setIsHovering(true);
-  };
+  const handleMouseEnter = () => setIsHovering(true);
+  const handleMouseLeave = () => setIsHovering(false);
 
-  // Handle mouse leave
-  const handleMouseLeave = () => {
-    setIsHovering(false);
-  };
-
-  // Reset idle timers on user activity
   const resetIdleTimers = () => {
     lastActivityRef.current = Date.now();
     
-    // Clear existing timers
-    if (idleTimer20Ref.current) {
-      clearTimeout(idleTimer20Ref.current);
-    }
-    if (idleTimer45Ref.current) {
-      clearTimeout(idleTimer45Ref.current);
-    }
+    if (idleTimer20Ref.current) clearTimeout(idleTimer20Ref.current);
+    if (idleTimer45Ref.current) clearTimeout(idleTimer45Ref.current);
     
-    // Set 20s idle timer (only if not shown yet)
     if (!hasShown20sRef.current) {
       idleTimer20Ref.current = setTimeout(() => {
         if (!isOpen && !isHovering) {
@@ -358,7 +295,6 @@ Respond as MasterProDev's AI assistant. Provide helpful information about our se
       }, 20000);
     }
     
-    // Set 45s idle timer (only if not shown yet)
     if (!hasShown45sRef.current) {
       idleTimer45Ref.current = setTimeout(() => {
         if (!isOpen && !isHovering) {
@@ -369,7 +305,6 @@ Respond as MasterProDev's AI assistant. Provide helpful information about our se
     }
   };
 
-  // Initial greeting bubble (2s after mount)
   useEffect(() => {
     if (!hasShownInitialRef.current) {
       initialBubbleTimerRef.current = setTimeout(() => {
@@ -379,563 +314,236 @@ Respond as MasterProDev's AI assistant. Provide helpful information about our se
     }
 
     return () => {
-      if (initialBubbleTimerRef.current) {
-        clearTimeout(initialBubbleTimerRef.current);
-      }
+      if (initialBubbleTimerRef.current) clearTimeout(initialBubbleTimerRef.current);
     };
   }, []);
 
-  // Track user activity for idle detection
   useEffect(() => {
     const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
     
-    activityEvents.forEach(event => {
-      window.addEventListener(event, resetIdleTimers);
-    });
-
-    // Initial timer setup
+    activityEvents.forEach(event => window.addEventListener(event, resetIdleTimers));
     resetIdleTimers();
 
     return () => {
-      activityEvents.forEach(event => {
-        window.removeEventListener(event, resetIdleTimers);
-      });
-      if (idleTimer20Ref.current) {
-        clearTimeout(idleTimer20Ref.current);
-      }
-      if (idleTimer45Ref.current) {
-        clearTimeout(idleTimer45Ref.current);
-      }
-      if (bubbleHideTimerRef.current) {
-        clearTimeout(bubbleHideTimerRef.current);
-      }
+      activityEvents.forEach(event => window.removeEventListener(event, resetIdleTimers));
+      if (idleTimer20Ref.current) clearTimeout(idleTimer20Ref.current);
+      if (idleTimer45Ref.current) clearTimeout(idleTimer45Ref.current);
+      if (bubbleHideTimerRef.current) clearTimeout(bubbleHideTimerRef.current);
     };
   }, [isOpen, isHovering]);
 
+  // Quick action buttons
+  const quickActions = [
+    { label: "Services", icon: "💼" },
+    { label: "Consultants", icon: "👨‍💼" },
+    { label: "Pricing", icon: "💰" }
+  ];
+
+  const handleQuickAction = (action) => {
+    setInputMessage(`Tell me about your ${action.toLowerCase()}`);
+  };
+
   return (
     <>
-      {/* Floating Button - Bottom Right with NATO-Style 4-Point Star */}
+      {/* Floating Button */}
       <div 
-        className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4"
+        className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3"
         style={{ zIndex: 9999 }}
       >
-        {/* Thought Bubble - Now appears ABOVE the button */}
+        {/* Thought Bubble */}
         {showBubble && !isOpen && (
-          <div className="thought-bubble-container-top">
-            <div className="thought-bubble-top">
-              <p className="thought-bubble-text">{bubbleMessage}</p>
-              {/* Thought bubble circles pointing DOWN to button */}
-              <div className="thought-circle-down thought-circle-1"></div>
-              <div className="thought-circle-down thought-circle-2"></div>
-              <div className="thought-circle-down thought-circle-3"></div>
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="relative bg-white rounded-2xl px-4 py-3 shadow-xl border border-gray-100 max-w-[200px]">
+              <p className="text-sm font-medium text-gray-800">{bubbleMessage}</p>
+              <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white border-r border-b border-gray-100 transform rotate-45"></div>
             </div>
           </div>
         )}
 
-        {/* Main Button with 4-Color Gradient */}
+        {/* Main Button */}
         <button
           onClick={() => setIsOpen(!isOpen)}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          className="floating-assistant-button"
-          title="Chat with AI Assistant"
-          aria-label="Open AI Assistant Chat"
+          className="group relative w-16 h-16 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 hover:shadow-[0_8px_30px_rgba(106,17,203,0.4)]"
+          style={{
+            background: 'conic-gradient(from 0deg, #6A11CB, #5271ff, #00BF63, #FFD54F, #6A11CB)'
+          }}
         >
-          {/* SVG NATO-Style 4-Pointed Star with Enhanced Gradient */}
-          <svg className="nato-star-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            {/* Outer glow effect with gradient colors */}
-            <circle cx="50" cy="50" r="48" fill="url(#outerGlowEnhanced)" opacity="0.5" className="glow-pulse"/>
-            
-            {/* Main circular base with enhanced 4-color conic gradient */}
-            <circle cx="50" cy="50" r="45" fill="url(#mainGradientEnhanced)" className="base-circle"/>
-            
-            {/* Animated rotating gradient ring */}
-            <circle cx="50" cy="50" r="45" fill="none" stroke="url(#ringGradientEnhanced)" strokeWidth="2" className="border-ring-animated" opacity="0.8"/>
-            
-            {/* 4-Pointed NATO Star - Sharp and Symmetrical */}
-            <path 
-              d="M 50 15 L 55 45 L 85 50 L 55 55 L 50 85 L 45 55 L 15 50 L 45 45 Z" 
-              fill="white" 
-              className="star-shape"
-              filter="url(#starShadowEnhanced)"
-            />
-            
-            {/* Inner star highlight for depth */}
-            <path 
-              d="M 50 20 L 53 45 L 80 50 L 53 55 L 50 80 L 47 55 L 20 50 L 47 45 Z" 
-              fill="url(#starHighlightEnhanced)" 
-              opacity="0.5"
-              className="star-highlight"
-            />
-            
-            {/* Center dot with gradient */}
-            <circle cx="50" cy="50" r="6" fill="url(#centerDotGradient)" className="center-dot" filter="url(#dotGlowEnhanced)"/>
-            
-            {/* Enhanced Gradients and Filters */}
-            <defs>
-              {/* Enhanced 4-Color Conic-Style Radial Gradient: Purple → Blue → Green → Yellow */}
-              <radialGradient id="mainGradientEnhanced" cx="50%" cy="50%">
-                <stop offset="0%" stopColor="#7D3CFF" />
-                <stop offset="33%" stopColor="#355CFF" />
-                <stop offset="66%" stopColor="#00BF63" />
-                <stop offset="100%" stopColor="#FFD54F" />
-              </radialGradient>
-              
-              {/* Outer glow gradient with all 4 colors */}
-              <radialGradient id="outerGlowEnhanced" cx="50%" cy="50%">
-                <stop offset="0%" stopColor="#7D3CFF" stopOpacity="0.6" />
-                <stop offset="33%" stopColor="#355CFF" stopOpacity="0.4" />
-                <stop offset="66%" stopColor="#00BF63" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#FFD54F" stopOpacity="0.2" />
-              </radialGradient>
-              
-              {/* Animated ring gradient cycling through all colors */}
-              <linearGradient id="ringGradientEnhanced" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#7D3CFF">
-                  <animate attributeName="stop-color" values="#7D3CFF; #355CFF; #00BF63; #FFD54F; #7D3CFF" dur="4s" repeatCount="indefinite" />
-                </stop>
-                <stop offset="50%" stopColor="#355CFF">
-                  <animate attributeName="stop-color" values="#355CFF; #00BF63; #FFD54F; #7D3CFF; #355CFF" dur="4s" repeatCount="indefinite" />
-                </stop>
-                <stop offset="100%" stopColor="#00BF63">
-                  <animate attributeName="stop-color" values="#00BF63; #FFD54F; #7D3CFF; #355CFF; #00BF63" dur="4s" repeatCount="indefinite" />
-                </stop>
-              </linearGradient>
-              
-              {/* Star highlight with gradient blend */}
-              <radialGradient id="starHighlightEnhanced" cx="50%" cy="30%">
-                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
-                <stop offset="50%" stopColor="#FFD54F" stopOpacity="0.4" />
-                <stop offset="100%" stopColor="#7D3CFF" stopOpacity="0.2" />
-              </radialGradient>
-              
-              {/* Center dot gradient */}
-              <linearGradient id="centerDotGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#FFFFFF" />
-                <stop offset="100%" stopColor="#FFD54F" />
-              </linearGradient>
-              
-              {/* Enhanced star shadow filter */}
-              <filter id="starShadowEnhanced">
-                <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#7D3CFF" floodOpacity="0.4"/>
-              </filter>
-              
-              {/* Enhanced dot glow filter */}
-              <filter id="dotGlowEnhanced">
-                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-          </svg>
+          <div className="absolute inset-1 bg-white rounded-full flex items-center justify-center">
+            <MessageCircle className="w-7 h-7 text-[#6A11CB] group-hover:scale-110 transition-transform" />
+          </div>
+          
+          {/* Pulse ring */}
+          <div className="absolute inset-0 rounded-full animate-ping opacity-20" style={{
+            background: 'conic-gradient(from 0deg, #6A11CB, #5271ff, #00BF63, #FFD54F, #6A11CB)'
+          }}></div>
         </button>
       </div>
 
-      {/* Chat Overlay */}
+      {/* Chat Window */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="chat-container-gradient rounded-2xl shadow-2xl w-full max-w-md h-[600px] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setIsOpen(false)}
+          ></div>
+          
+          {/* Chat Container */}
+          <div className="relative w-full sm:w-[400px] h-[85vh] sm:h-[600px] sm:max-h-[80vh] bg-white sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+            
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/20 bg-white/10 backdrop-blur-md">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <svg width="24" height="24" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M 50 15 L 55 45 L 85 50 L 55 55 L 50 85 L 45 55 L 15 50 L 45 45 Z" fill="white"/>
-                    <circle cx="50" cy="50" r="6" fill="white"/>
-                  </svg>
+            <div className="relative overflow-hidden">
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(135deg, #6A11CB 0%, #5271ff 50%, #00BF63 100%)'
+                }}
+              ></div>
+              <div className="relative px-5 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white text-lg">MasterProDev AI</h3>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                      <span className="text-white/80 text-xs">Online</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-white">MasterProDev AI</h3>
-                  <p className="text-sm text-white/80">Your AI Guide 🤖</p>
-                </div>
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setIsOpen(false)}
-                className="text-white hover:bg-white/20"
-              >
-                <X className="w-5 h-5" />
-              </Button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 messages-gradient-bg">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white">
               {messages.map(message => (
-                <div key={message.id} className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}>
-                  <div 
-                    className={`max-w-xs p-3 rounded-2xl backdrop-blur-sm ${
-                      message.isBot 
-                        ? 'bg-white/90 text-gray-800 shadow-lg' 
-                        : 'bg-gradient-to-r from-[#7D3CFF] to-[#00BF63] text-white shadow-lg'
-                    }`}
-                  >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
-                    <div className={`flex items-center justify-between mt-1 ${message.isBot ? 'text-gray-500' : 'text-white/70'}`}>
-                      <p className="text-xs">
+                <div 
+                  key={message.id} 
+                  className={`flex ${message.isBot ? 'justify-start' : 'justify-end'} animate-in fade-in slide-in-from-bottom-2 duration-200`}
+                >
+                  {message.isBot && (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6A11CB] to-[#00BF63] flex items-center justify-center mr-2 flex-shrink-0">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+                  <div className={`max-w-[75%] ${message.isBot ? '' : 'order-1'}`}>
+                    <div 
+                      className={`px-4 py-3 rounded-2xl ${
+                        message.isBot 
+                          ? 'bg-white shadow-md border border-gray-100 rounded-tl-md' 
+                          : 'bg-gradient-to-r from-[#6A11CB] to-[#5271ff] text-white rounded-tr-md'
+                      }`}
+                    >
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
+                    </div>
+                    <div className={`flex items-center gap-2 mt-1 px-1 ${message.isBot ? '' : 'justify-end'}`}>
+                      <span className="text-[10px] text-gray-400">
                         {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                      {/* Feedback buttons for bot messages */}
-                      {message.isBot && message.id !== 1 && (
-                        <div className="flex items-center gap-1 ml-2">
-                          {message.feedback ? (
-                            <span className="text-xs text-gray-400">
-                              {message.feedback === 'positive' ? '👍 Thanks!' : '👎 Noted'}
-                            </span>
-                          ) : (
-                            <>
-                              <button 
-                                onClick={() => handleFeedback(message.id, true)}
-                                className="p-1 hover:bg-green-100 rounded-full transition-colors"
-                                title="Helpful"
-                              >
-                                <ThumbsUp className="w-3 h-3 text-gray-400 hover:text-green-500" />
-                              </button>
-                              <button 
-                                onClick={() => handleFeedback(message.id, false)}
-                                className="p-1 hover:bg-red-100 rounded-full transition-colors"
-                                title="Not helpful"
-                              >
-                                <ThumbsDown className="w-3 h-3 text-gray-400 hover:text-red-500" />
-                              </button>
-                            </>
-                          )}
+                      </span>
+                      {message.isBot && message.id !== 1 && !message.feedback && (
+                        <div className="flex items-center gap-0.5">
+                          <button 
+                            onClick={() => handleFeedback(message.id, true)}
+                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                          >
+                            <ThumbsUp className="w-3 h-3 text-gray-300 hover:text-green-500" />
+                          </button>
+                          <button 
+                            onClick={() => handleFeedback(message.id, false)}
+                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                          >
+                            <ThumbsDown className="w-3 h-3 text-gray-300 hover:text-red-400" />
+                          </button>
                         </div>
+                      )}
+                      {message.feedback && (
+                        <span className="text-[10px] text-gray-400">
+                          {message.feedback === 'positive' ? '✓' : '✗'}
+                        </span>
                       )}
                     </div>
                   </div>
                 </div>
               ))}
+              
               {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-white/90 text-gray-800 max-w-xs p-3 rounded-2xl backdrop-blur-sm shadow-lg">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-[#7D3CFF] rounded-full animate-pulse"></div>
-                      <div className="w-2 h-2 bg-[#00BF63] rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-2 h-2 bg-[#FFD54F] rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                <div className="flex justify-start animate-in fade-in duration-200">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6A11CB] to-[#00BF63] flex items-center justify-center mr-2">
+                    <Sparkles className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="bg-white shadow-md border border-gray-100 rounded-2xl rounded-tl-md px-4 py-3">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 bg-[#6A11CB] rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-[#5271ff] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-[#00BF63] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
-                    <span className="text-sm text-gray-500">Thinking...</span>
                   </div>
                 </div>
               )}
+              <div ref={messagesEndRef} />
             </div>
 
+            {/* Quick Actions */}
+            {messages.length <= 2 && (
+              <div className="px-4 pb-2 flex gap-2 overflow-x-auto">
+                {quickActions.map((action) => (
+                  <button
+                    key={action.label}
+                    onClick={() => handleQuickAction(action.label)}
+                    className="flex-shrink-0 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-full text-xs font-medium text-gray-700 transition-colors flex items-center gap-1"
+                  >
+                    <span>{action.icon}</span>
+                    <span>{action.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {/* Input */}
-            <div className="p-4 border-t border-white/20 bg-white/10 backdrop-blur-md">
+            <div className="p-4 border-t border-gray-100 bg-white">
               <div className="flex items-center gap-2">
                 <div className="flex-1 relative">
-                  <Textarea
-                    placeholder="Ask about our AI services..."
+                  <input
+                    type="text"
+                    placeholder="Type a message..."
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="resize-none h-10 pr-12 rounded-full border-2 border-white/30 focus:border-white/60 bg-white/90 backdrop-blur-sm"
+                    className="w-full px-4 py-3 bg-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#6A11CB]/20 focus:bg-white border border-transparent focus:border-[#6A11CB]/30 transition-all pr-12"
                   />
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
                     onClick={toggleVoice}
-                    className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${isListening ? 'text-red-500' : 'text-gray-400'}`}
-                    title={isListening ? 'Stop listening' : 'Voice input'}
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-colors ${
+                      isListening ? 'bg-red-100 text-red-500' : 'text-gray-400 hover:text-gray-600'
+                    }`}
                   >
                     {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                  </Button>
+                  </button>
                 </div>
-                <Button 
+                <button 
                   onClick={handleSendMessage} 
                   disabled={!inputMessage.trim() || isLoading}
-                  className="rounded-full w-10 h-10 p-0 bg-gradient-to-r from-[#7D3CFF] to-[#00BF63] hover:from-[#6B2DDD] hover:to-[#00AF53] shadow-lg"
+                  className="w-11 h-11 rounded-full flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+                  style={{
+                    background: inputMessage.trim() ? 'linear-gradient(135deg, #6A11CB 0%, #5271ff 100%)' : '#e5e7eb'
+                  }}
                 >
-                  <Send className="w-4 h-4 text-white" />
-                </Button>
+                  <Send className={`w-5 h-5 ${inputMessage.trim() ? 'text-white' : 'text-gray-400'}`} />
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        /* Chat Container with Single Smooth Gradient Background */
-        .chat-container-gradient {
-          background: linear-gradient(135deg, #7D3CFF 0%, #355CFF 50%, #00BF63 100%);
-          position: relative;
-          box-shadow: 0 25px 50px rgba(53, 92, 255, 0.4);
-        }
-
-        /* Messages Area with Subtle Tint */
-        .messages-gradient-bg {
-          background: rgba(255, 255, 255, 0.08);
-          position: relative;
-        }
-
-        /* Floating Assistant Button */
-        .floating-assistant-button {
-          width: 80px;
-          height: 80px;
-          border: none;
-          background: transparent;
-          cursor: pointer;
-          transition: transform 0.3s ease;
-          position: relative;
-          animation: buttonFloat 3s ease-in-out infinite;
-        }
-
-        .floating-assistant-button:hover {
-          transform: scale(1.15);
-          animation: buttonFloatHover 1.5s ease-in-out infinite;
-        }
-
-        .nato-star-svg {
-          width: 100%;
-          height: 100%;
-          filter: drop-shadow(0 4px 20px rgba(125, 60, 255, 0.5)) 
-                  drop-shadow(0 0 15px rgba(53, 92, 255, 0.3));
-        }
-
-        .floating-assistant-button:hover .nato-star-svg {
-          filter: drop-shadow(0 8px 35px rgba(125, 60, 255, 0.8)) 
-                  drop-shadow(0 0 25px rgba(0, 191, 99, 0.6))
-                  drop-shadow(0 0 20px rgba(255, 213, 79, 0.4));
-        }
-
-        .base-circle {
-          transition: all 0.3s ease;
-          animation: rotateGradient 8s linear infinite;
-        }
-
-        @keyframes rotateGradient {
-          0% {
-            filter: hue-rotate(0deg) brightness(1);
-          }
-          50% {
-            filter: hue-rotate(20deg) brightness(1.1);
-          }
-          100% {
-            filter: hue-rotate(0deg) brightness(1);
-          }
-        }
-
-        .floating-assistant-button:hover .base-circle {
-          animation: rotateGradientFast 4s linear infinite;
-        }
-
-        @keyframes rotateGradientFast {
-          0% {
-            filter: hue-rotate(0deg) brightness(1.1);
-          }
-          100% {
-            filter: hue-rotate(360deg) brightness(1.2);
-          }
-        }
-
-        .star-shape {
-          transition: all 0.3s ease;
-          transform-origin: center;
-          animation: starRotate 6s linear infinite;
-        }
-
-        .floating-assistant-button:hover .star-shape {
-          animation: starRotate 3s linear infinite;
-        }
-
-        .star-highlight {
-          transform-origin: center;
-          animation: starRotate 6s linear infinite;
-        }
-
-        .floating-assistant-button:hover .star-highlight {
-          animation: starRotate 3s linear infinite;
-        }
-
-        .border-ring-animated {
-          animation: ringPulseEnhanced 3s ease-in-out infinite;
-          stroke-dasharray: 283;
-          stroke-dashoffset: 0;
-        }
-
-        .floating-assistant-button:hover .border-ring-animated {
-          animation: ringRotate 2s linear infinite, ringPulseEnhanced 3s ease-in-out infinite;
-        }
-
-        @keyframes ringPulseEnhanced {
-          0%, 100% {
-            stroke-width: 2;
-            opacity: 0.6;
-          }
-          50% {
-            stroke-width: 3.5;
-            opacity: 1;
-          }
-        }
-
-        @keyframes ringRotate {
-          0% {
-            stroke-dashoffset: 0;
-          }
-          100% {
-            stroke-dashoffset: 283;
-          }
-        }
-
-        .glow-pulse {
-          animation: glowPulseEnhanced 3s ease-in-out infinite;
-        }
-
-        @keyframes glowPulseEnhanced {
-          0%, 100% {
-            opacity: 0.4;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.7;
-            transform: scale(1.08);
-          }
-        }
-
-        .center-dot {
-          animation: dotPulseEnhanced 2s ease-in-out infinite;
-        }
-
-        @keyframes dotPulseEnhanced {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 1;
-          }
-          50% {
-            transform: scale(1.4);
-            opacity: 0.8;
-          }
-        }
-
-        /* Thought Bubble Container - POSITIONED ABOVE */
-        .thought-bubble-container-top {
-          position: relative;
-          animation: bubbleAppearFromTop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-          margin-bottom: 8px;
-          margin-right: -10px;
-        }
-
-        .thought-bubble-top {
-          position: relative;
-          background: #ffffff;
-          padding: 16px 20px;
-          border-radius: 20px;
-          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-          max-width: 280px;
-          min-width: 200px;
-          border: 2px solid rgba(53, 92, 255, 0.3);
-        }
-
-        .thought-bubble-text {
-          margin: 0;
-          font-size: 14px;
-          font-weight: 600;
-          color: #1a202c;
-          line-height: 1.5;
-        }
-
-        /* Thought Bubble Circles (pointing DOWN to button) */
-        .thought-circle-down {
-          position: absolute;
-          background: #ffffff;
-          border-radius: 50%;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-          border: 1px solid rgba(53, 92, 255, 0.2);
-        }
-
-        .thought-circle-down.thought-circle-1 {
-          width: 12px;
-          height: 12px;
-          bottom: -20px;
-          right: 35px;
-          animation: thoughtFloatDown 2s ease-in-out infinite;
-        }
-
-        .thought-circle-down.thought-circle-2 {
-          width: 8px;
-          height: 8px;
-          bottom: -28px;
-          right: 38px;
-          animation: thoughtFloatDown 2s ease-in-out infinite 0.2s;
-        }
-
-        .thought-circle-down.thought-circle-3 {
-          width: 5px;
-          height: 5px;
-          bottom: -34px;
-          right: 40px;
-          animation: thoughtFloatDown 2s ease-in-out infinite 0.4s;
-        }
-
-        /* Animations */
-        @keyframes buttonFloat {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-8px);
-          }
-        }
-
-        @keyframes buttonFloatHover {
-          0%, 100% {
-            transform: translateY(0) scale(1.15);
-          }
-          50% {
-            transform: translateY(-8px) scale(1.2);
-          }
-        }
-
-        @keyframes starRotate {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
-        }
-
-        @keyframes bubbleAppearFromTop {
-          0% {
-            opacity: 0;
-            transform: scale(0.6) translateY(20px);
-          }
-          70% {
-            transform: scale(1.05) translateY(-5px);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
-        }
-
-        @keyframes thoughtFloatDown {
-          0%, 100% {
-            transform: translateY(0) scale(1);
-            opacity: 1;
-          }
-          50% {
-            transform: translateY(3px) scale(1.1);
-            opacity: 0.7;
-          }
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-          .floating-assistant-button {
-            width: 70px;
-            height: 70px;
-          }
-
-          .thought-bubble-top {
-            max-width: 220px;
-            font-size: 13px;
-            padding: 12px 16px;
-          }
-        }
-      `}</style>
     </>
   );
 }
