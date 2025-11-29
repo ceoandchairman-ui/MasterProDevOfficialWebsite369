@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Mic, MicOff } from 'lucide-react';
-import { InvokeLLM } from '@/integrations/Core';
-import { User } from '@/entities/User';
+import { X, Send, Mic, MicOff, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { Service } from '@/entities/Service';
+import { Consultant } from '@/entities/Consultant';
 
 export default function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,6 +20,18 @@ export default function FloatingChatbot() {
   const [isLoading, setIsLoading] = useState(false);
   const [contextData, setContextData] = useState(null);
   const [isListening, setIsListening] = useState(false);
+  
+  // Data integration state
+  const [services, setServices] = useState([]);
+  const [consultants, setConsultants] = useState([]);
+  
+  // Page context tracking
+  const [currentPage, setCurrentPage] = useState('');
+  const [pageTimeSpent, setPageTimeSpent] = useState(0);
+  const pageTimerRef = useRef(null);
+  
+  // Proactive assistance state
+  const [hasOfferedProactiveHelp, setHasOfferedProactiveHelp] = useState(false);
   
   // State for thought bubble
   const [showBubble, setShowBubble] = useState(false);
@@ -43,7 +54,73 @@ export default function FloatingChatbot() {
     idle45s: "Ask me anything — I'm here to assist you 📌"
   };
 
-  const siteContext = `
+  // Fetch services and consultants data on mount
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [servicesData, consultantsData] = await Promise.all([
+          Service.list(),
+          Consultant.list()
+        ]);
+        setServices(servicesData);
+        setConsultants(consultantsData);
+      } catch (err) {
+        console.error('Failed to fetch chatbot data:', err);
+      }
+    }
+    fetchData();
+  }, []);
+
+  // Track current page and time spent
+  useEffect(() => {
+    const updateCurrentPage = () => {
+      const path = window.location.pathname;
+      const pageName = path.split('/').pop() || 'Home';
+      setCurrentPage(pageName);
+      setPageTimeSpent(0);
+      setHasOfferedProactiveHelp(false);
+    };
+
+    updateCurrentPage();
+    window.addEventListener('popstate', updateCurrentPage);
+
+    // Track time spent on page
+    pageTimerRef.current = setInterval(() => {
+      setPageTimeSpent(prev => prev + 1);
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('popstate', updateCurrentPage);
+      if (pageTimerRef.current) clearInterval(pageTimerRef.current);
+    };
+  }, []);
+
+  // Proactive assistance based on page and time
+  useEffect(() => {
+    if (hasOfferedProactiveHelp || isOpen) return;
+
+    const proactiveMessages = {
+      'HireConsultant': { time: 30, message: "Looking for the right consultant? I can help you find the perfect match for your needs! 🎯" },
+      'ServicesPage': { time: 25, message: "Exploring our services? Let me help you find the best solution for your goals! 💡" },
+      'ContactPage': { time: 20, message: "Have questions before reaching out? I'm here to help! 📬" },
+      'TellYourIdeaPage': { time: 15, message: "Need help articulating your idea? I can guide you through it! ✨" }
+    };
+
+    const pageConfig = proactiveMessages[currentPage];
+    if (pageConfig && pageTimeSpent >= pageConfig.time) {
+      setHasOfferedProactiveHelp(true);
+      showBubbleWithMessage(pageConfig.message, 8000);
+    }
+  }, [pageTimeSpent, currentPage, hasOfferedProactiveHelp, isOpen]);
+
+  // Build dynamic context with real data
+  const buildDynamicContext = () => {
+    const servicesList = services.map(s => `- ${s.name} (${s.category}): ${s.description}`).join('\n');
+    const consultantsList = consultants.map(c => 
+      `- ${c.name} (${c.title}): ${c.servicesOffered?.join(', ')} | Rate: $${c.hourlyRate}/hr | Location: ${c.location}`
+    ).join('\n');
+
+    return `
 You are the AI assistant for MasterProDev - a leading AI consulting company based in Toronto, ON, Canada.
 
 COMPANY OVERVIEW:
@@ -52,21 +129,33 @@ COMPANY OVERVIEW:
 - Mission: Empower professionals and businesses through AI transformation
 - Tagline: "Elevating Your Professional Journey"
 
-OUR 5 CORE AI SERVICE PILLARS:
+OUR SERVICES (REAL-TIME DATA):
+${servicesList || 'No services available at the moment.'}
 
-1. AI Powered Job Search & Professional Development
-2. AI Powered Business Development
-3. AI Agents & Automations
-4. AI Consulting
-5. AI Optimized Chatbots & Support Systems
+OUR CONSULTANTS (REAL-TIME DATA):
+${consultantsList || 'No consultants available at the moment.'}
+
+USER CONTEXT:
+- Currently viewing: ${currentPage} page
+- Time on page: ${pageTimeSpent} seconds
 
 YOUR ROLE AS THE CHATBOT:
-- Answer questions about MasterProDev's services and offerings
+- Answer questions about MasterProDev's services and offerings using the REAL data above
+- Recommend specific consultants based on user needs
 - Guide users to the right service or consultant for their needs
 - Help users navigate the website and find relevant information
 - Qualify leads and direct them to contact forms or consultation bookings
 - Always be professional, helpful, and sales-oriented (but not pushy)
+- When recommending consultants, mention their name, expertise, and hourly rate
 `;
+  };
+
+  // Handle feedback
+  const handleFeedback = (messageId, isPositive) => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === messageId ? { ...msg, feedback: isPositive ? 'positive' : 'negative' } : msg
+    ));
+  };
 
   useEffect(() => {
     const handleChatbotOpen = (event) => {
@@ -125,10 +214,16 @@ YOUR ROLE AS THE CHATBOT:
     setIsLoading(true);
 
     try {
+      const siteContext = buildDynamicContext();
       let prompt = '';
       
+      // Build conversation history for context
+      const recentMessages = messages.slice(-6).map(m => 
+        `${m.isBot ? 'Assistant' : 'User'}: ${m.text}`
+      ).join('\n');
+      
       if (contextData) {
-        const { formData, uploadedFiles, metadata } = contextData;
+        const { formData, uploadedFiles } = contextData;
         
         prompt = `${siteContext}
 
@@ -138,18 +233,24 @@ CONTEXT FROM USER'S FORM SUBMISSION:
 - Files Uploaded: ${uploadedFiles?.length || 0} files
 - Contact Info: ${formData?.email || 'Not provided'}, ${formData?.phone || 'Not provided'}
 
+RECENT CONVERSATION:
+${recentMessages}
+
 USER'S CURRENT MESSAGE: ${inputMessage}
 
-Respond as MasterProDev's AI assistant. Reference their submitted information and guide them toward our services or consultants that can help.`;
+Respond as MasterProDev's AI assistant. Reference their submitted information and guide them toward our services or consultants that can help. Use the real consultant and service data provided.`;
       } else {
         prompt = `${siteContext}
 
-USER'S MESSAGE: ${inputMessage}
+RECENT CONVERSATION:
+${recentMessages}
 
-Respond as MasterProDev's AI assistant. Provide helpful information about our services and guide the user toward solutions we offer.`;
+USER'S CURRENT MESSAGE: ${inputMessage}
+
+Respond as MasterProDev's AI assistant. Provide helpful information about our services and guide the user toward solutions we offer. Use the real consultant and service data provided when relevant.`;
       }
 
-      const response = await InvokeLLM({
+      const response = await base44.integrations.Core.InvokeLLM({
         prompt: prompt,
         add_context_from_internet: false
       });
@@ -472,9 +573,38 @@ Respond as MasterProDev's AI assistant. Provide helpful information about our se
                     }`}
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
-                    <p className={`text-xs mt-1 ${message.isBot ? 'text-gray-500' : 'text-white/70'}`}>
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
+                    <div className={`flex items-center justify-between mt-1 ${message.isBot ? 'text-gray-500' : 'text-white/70'}`}>
+                      <p className="text-xs">
+                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                      {/* Feedback buttons for bot messages */}
+                      {message.isBot && message.id !== 1 && (
+                        <div className="flex items-center gap-1 ml-2">
+                          {message.feedback ? (
+                            <span className="text-xs text-gray-400">
+                              {message.feedback === 'positive' ? '👍 Thanks!' : '👎 Noted'}
+                            </span>
+                          ) : (
+                            <>
+                              <button 
+                                onClick={() => handleFeedback(message.id, true)}
+                                className="p-1 hover:bg-green-100 rounded-full transition-colors"
+                                title="Helpful"
+                              >
+                                <ThumbsUp className="w-3 h-3 text-gray-400 hover:text-green-500" />
+                              </button>
+                              <button 
+                                onClick={() => handleFeedback(message.id, false)}
+                                className="p-1 hover:bg-red-100 rounded-full transition-colors"
+                                title="Not helpful"
+                              >
+                                <ThumbsDown className="w-3 h-3 text-gray-400 hover:text-red-500" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
