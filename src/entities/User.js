@@ -14,6 +14,11 @@ export class User {
 
   static async login(email, password) {
     try {
+      // If no arguments, redirect to login page or open login modal
+      if (!email || !password) {
+        window.location.href = '/login';
+        return null;
+      }
       const response = await apiClient.post('/auth/login', { email, password });
       if (response.token) {
         localStorage.setItem('auth_token', response.token);
