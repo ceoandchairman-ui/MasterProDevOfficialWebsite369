@@ -407,11 +407,11 @@ Respond helpfully and concisely.`;
                     background: 'conic-gradient(from 0deg, #6A11CB, #5271ff, #00BF63, #FFD54F, #6A11CB)'
                   }}>
                     <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
-                      <img 
-                        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/687824d22dba5b3c55552294/5d0392998_Screenshot2025-01-21142606.jpg" 
-                        alt="MasterProDev Logo"
-                        className="w-full h-full object-contain p-1"
-                      />
+                                                <img 
+                                                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/687824d22dba5b3c55552294/939a8b78b_Screenshot2025-01-21142606.jpg" 
+                                                  alt="MasterProDev Logo"
+                                                  className="w-full h-full object-contain p-1"
+                                                />
                     </div>
                   </div>
                   <div>
