@@ -154,13 +154,13 @@ export default function Layout({ children, currentPageName }) {
               
               {/* Left Side: Logo & Company Name */}
                                   <Link to={createPageUrl('Home')} className="flex items-center space-x-3 flex-shrink-0 hover:opacity-80 transition-opacity">
-                                    <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{
-                                      background: 'conic-gradient(from 0deg, #6A11CB, #5271ff, #00BF63, #FFD54F, #6A11CB)'
-                                    }}>
-                                      <div className="w-full h-full bg-white m-[2px] rounded-full flex items-center justify-center" style={{ width: 'calc(100% - 4px)', height: 'calc(100% - 4px)' }}>
-                                        <span className="text-lg font-black bg-gradient-to-r from-[#6A11CB] via-[#5271ff] to-[#00BF63] bg-clip-text text-transparent">M</span>
-                                      </div>
-                                    </div>
+                                                                            <div className="w-10 h-10 flex-shrink-0">
+                                                                              <img 
+                                                                                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/687824d22dba5b3c55552294/939a8b78b_Screenshot2025-01-21142606.jpg" 
+                                                                                alt="MasterProDev Logo"
+                                                                                className="w-full h-full object-contain"
+                                                                              />
+                                                                            </div>
                                     <div className="hidden md:block">
                                       <span className="font-bold text-xl">
                                         <span style={{ color: '#ffb400' }}>Master</span>
