@@ -403,8 +403,16 @@ Respond helpfully and concisely.`;
               ></div>
               <div className="relative px-5 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-white" />
+                  <div className="w-11 h-11 rounded-full p-[2px]" style={{
+                    background: 'conic-gradient(from 0deg, #6A11CB, #5271ff, #00BF63, #FFD54F, #6A11CB)'
+                  }}>
+                    <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                      <img 
+                        src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/687824d22dba5b3c55552294/5d0392998_Screenshot2025-01-21142606.jpg" 
+                        alt="MasterProDev Logo"
+                        className="w-full h-full object-contain p-1"
+                      />
+                    </div>
                   </div>
                   <div>
                     <h3 className="font-bold text-white text-lg">MasterProDev AI</h3>
