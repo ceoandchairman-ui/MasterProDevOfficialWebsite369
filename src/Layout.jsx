@@ -374,15 +374,15 @@ export default function Layout({ children, currentPageName }) {
                                           Instagram
                                         </span>
                                       </a>
-                                      <a href="#" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group social-link">
-                                        <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:brightness-125" style={{ backgroundColor: '#1877f2' }}>
-                                          <Facebook className="w-5 h-5 text-white" />
-                                        </div>
-                                        <span className="relative font-medium text-[#DDDDDD] transition-colors duration-300 group-hover:text-[#1877f2]">
-                                          Facebook
-                                          <span className="underline-spark" style={{ backgroundColor: '#1877f2', boxShadow: '0 1px 8px #1877f2' }}></span>
-                                        </span>
-                                      </a>
+                                      <a href="https://www.facebook.com/profile.php?id=61584563307854" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group social-link">
+                                                                    <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:brightness-125" style={{ backgroundColor: '#1877f2' }}>
+                                                                      <Facebook className="w-5 h-5 text-white" />
+                                                                    </div>
+                                                                    <span className="relative font-medium text-[#DDDDDD] transition-colors duration-300 group-hover:text-[#1877f2]">
+                                                                      Facebook
+                                                                      <span className="underline-spark" style={{ backgroundColor: '#1877f2', boxShadow: '0 1px 8px #1877f2' }}></span>
+                                                                    </span>
+                                                                  </a>
                                       <a href="#" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group social-link">
                                                                     <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:brightness-125" style={{ backgroundColor: '#0077b5' }}>
                                                                       <Linkedin className="w-5 h-5 text-white" />
