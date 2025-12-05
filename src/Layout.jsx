@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { User } from '@/entities/User';
 import { Link } from 'react-router-dom';
@@ -154,12 +153,22 @@ export default function Layout({ children, currentPageName }) {
             <div className="flex items-center justify-between h-16">
               
               {/* Left Side: Logo & Company Name */}
-              <Link to={createPageUrl('Home')} className="flex items-center space-x-3 flex-shrink-0 hover:opacity-80 transition-opacity">
-                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex-shrink-0"></div>
-                <div className="hidden md:block">
-                  <span className="font-bold text-xl">MasterProDev</span>
-                </div>
-              </Link>
+                                  <Link to={createPageUrl('Home')} className="flex items-center space-x-3 flex-shrink-0 hover:opacity-80 transition-opacity">
+                                    <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden" style={{
+                                      background: 'conic-gradient(from 0deg, #6A11CB, #5271ff, #00BF63, #FFD54F, #6A11CB)'
+                                    }}>
+                                      <div className="w-full h-full bg-white m-[2px] rounded-full flex items-center justify-center" style={{ width: 'calc(100% - 4px)', height: 'calc(100% - 4px)' }}>
+                                        <span className="text-lg font-black bg-gradient-to-r from-[#6A11CB] via-[#5271ff] to-[#00BF63] bg-clip-text text-transparent">M</span>
+                                      </div>
+                                    </div>
+                                    <div className="hidden md:block">
+                                      <span className="font-bold text-xl">
+                                        <span style={{ color: '#ffb400' }}>Master</span>
+                                        <span style={{ color: '#5271ff' }}>Pro</span>
+                                        <span style={{ color: '#00bf63' }}>Dev</span>
+                                      </span>
+                                    </div>
+                                  </Link>
 
               {/* Center: CRT Search Bar (Desktop) */}
               <div className="hidden lg:flex flex-1 justify-center px-8">
