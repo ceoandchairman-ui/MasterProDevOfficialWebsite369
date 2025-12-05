@@ -343,7 +343,7 @@ export default function Layout({ children, currentPageName }) {
               <h3 className="text-lg font-semibold flex items-center gap-2 brand-blue">
                 Contact Us
               </h3>
-              <a href="mailto:masterprodevconsultant@outlook.com" className="flex items-center gap-4 group social-link">
+              <a href="mailto:ceo_and_chairman@masterprodev.com" className="flex items-center gap-4 group social-link">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:brightness-125" style={{ backgroundColor: '#5271ff' }}>
                   <Mail className="w-5 h-5 text-white" />
                 </div>
