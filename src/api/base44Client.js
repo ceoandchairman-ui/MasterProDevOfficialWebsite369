@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create a simple axios client for API calls
 export const apiClient = axios.create({
-  baseURL: process.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -54,6 +54,10 @@ export const base44 = {
       SendEmail: async (data) => {
         console.warn('SendEmail mock called:', data);
         return { success: true, message: 'Email queued (mock)' };
+      },
+      InvokeLLM: async (data) => {
+        console.warn('InvokeLLM mock called:', data);
+        return 'This is a mock AI response. Please configure a real LLM endpoint.';
       }
     }
   }
