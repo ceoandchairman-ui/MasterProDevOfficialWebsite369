@@ -33,4 +33,30 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Base44 compatibility object
+export const base44 = {
+  auth: {
+    me: async () => {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return null;
+      const mockUser = localStorage.getItem('mock_user');
+      return mockUser ? JSON.parse(mockUser) : null;
+    }
+  },
+  appLogs: {
+    logUserInApp: async (pageName) => {
+      console.log('Page tracked:', pageName);
+      return { success: true };
+    }
+  },
+  integrations: {
+    Core: {
+      SendEmail: async (data) => {
+        console.warn('SendEmail mock called:', data);
+        return { success: true, message: 'Email queued (mock)' };
+      }
+    }
+  }
+};
+
 export default apiClient;
