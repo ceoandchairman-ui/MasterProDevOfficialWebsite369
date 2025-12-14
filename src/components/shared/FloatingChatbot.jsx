@@ -400,19 +400,12 @@ Respond helpfully and concisely.`;
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
 
-          className="group relative w-16 h-16 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 hover:shadow-[0_8px_30px_rgba(106,17,203,0.4)]"
-          style={{
-            background: 'conic-gradient(from 0deg, #6A11CB, #5271ff, #00BF63, #FFD54F, #6A11CB)'
-          }}
+          className="group relative w-14 h-14 rounded-2xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl bg-gradient-to-br from-purple-600 to-blue-600"
         >
-          <div className="absolute inset-1 bg-white rounded-full flex items-center justify-center">
-            <MessageCircle className="w-7 h-7 text-[#6A11CB] group-hover:scale-110 transition-transform" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+          <div className="relative w-full h-full rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+            <Sparkles className="w-6 h-6 text-white group-hover:rotate-12 transition-transform" />
           </div>
-          
-          {/* Pulse ring */}
-          <div className="absolute inset-0 rounded-full animate-ping opacity-20" style={{
-            background: 'conic-gradient(from 0deg, #6A11CB, #5271ff, #00BF63, #FFD54F, #6A11CB)'
-          }}></div>
         </button>
       </div>
 
@@ -425,43 +418,32 @@ Respond helpfully and concisely.`;
             onClick={() => setIsOpen(false)}
           ></div>
           
-          {/* Chat Container */}
-          <div className="relative w-full sm:w-[400px] h-[85vh] sm:h-[600px] sm:max-h-[80vh] bg-white sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+          {/* Chat Container - Copilot Style */}
+          <div className="relative w-full sm:w-[420px] h-[90vh] sm:h-[680px] sm:max-h-[85vh] bg-[#1e1e1e] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden border border-gray-800">
             
-            {/* Header */}
-            <div className="relative overflow-hidden">
-              <div 
-                className="absolute inset-0"
-                style={{
-                  background: 'linear-gradient(135deg, #6A11CB 0%, #5271ff 50%, #00BF63 100%)'
-                }}
-              ></div>
-              <div className="relative px-5 py-4 flex items-center justify-between">
+            {/* Header - VS Code Style */}
+            <div className="relative bg-gradient-to-r from-[#2d2d2d] to-[#1e1e1e] border-b border-gray-800">
+              <div className="px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full p-[2px]" style={{
-                    background: 'conic-gradient(from 0deg, #6A11CB, #5271ff, #00BF63, #FFD54F, #6A11CB)'
-                  }}>
-                    <div className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
-                                                <img 
-                                                  src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/687824d22dba5b3c55552294/939a8b78b_Screenshot2025-01-21142606.jpg" 
-                                                  alt="MasterProDev Logo"
-                                                  className="w-full h-full object-contain p-1"
-                                                />
-                    </div>
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-lg">MasterProDev AI</h3>
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                      <span className="text-white/80 text-xs">Online</span>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-white text-sm">MasterProDev Copilot</h3>
+                      <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-[10px] font-medium rounded border border-purple-500/30">AI</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-gray-400 text-[11px] font-mono">Ready to assist</span>
                     </div>
                   </div>
                 </div>
                 <button 
                   onClick={() => setIsOpen(false)}
-                  className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                  className="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center transition-colors group"
                 >
-                  <X className="w-5 h-5 text-white" />
+                  <X className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
                 </button>
               </div>
             </div>
@@ -477,92 +459,122 @@ Respond helpfully and concisely.`;
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6A11CB] to-[#00BF63] flex items-center justify-center mr-2 flex-shrink-0">
                       <Sparkles className="w-4 h-4 text-white" />
                     </div>
-                  )}
-                  <div className={`max-w-[75%] ${message.isBot ? '' : 'order-1'}`}>
-                    <div 
-                      className={`px-4 py-3 rounded-2xl ${
-                        message.isBot 
-                          ? 'bg-white shadow-md border border-gray-100 rounded-tl-md' 
-                          : 'bg-gradient-to-r from-[#6A11CB] to-[#5271ff] text-white rounded-tr-md'
-                      }`}
-                    >
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
-                    </div>
-                    <div className={`flex items-center gap-2 mt-1 px-1 ${message.isBot ? '' : 'justify-end'}`}>
-                      <span className="text-[10px] text-gray-400">
-                        {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  )}- Copilot Chat Style */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#1e1e1e] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+              {messages.map(message => (
+                <div 
+                  key={message.id} 
+                  className={`flex gap-3 ${message.isBot ? '' : 'flex-row-reverse'} group`}
+                >
+                  {/* Avatar */}
+                  <div className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center ${
+                    message.isBot 
+                      ? 'bg-gradient-to-br from-purple-500 to-blue-500' 
+                      : 'bg-gradient-to-br from-blue-600 to-cyan-600'
+                  }`}>
+                    {message.isBot ? (
+                      <Sparkles className="w-4 h-4 text-white" />
+                    ) : (
+                      <span className="text-white text-xs font-bold">You</span>
+                    )}
+                  </div>
+                  
+                  {/* Message Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className={`${message.isBot ? 'text-left' : 'text-right'}`}>
+                      <span className="text-[11px] font-mono text-gray-500 px-1">
+                        {message.isBot ? 'Copilot' : 'You'} • {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
-                      {message.isBot && message.id !== 1 && !message.feedback && (
-                        <div className="flex items-center gap-0.5">
-                          <button 
-                            onClick={() => handleFeedback(message.id, true)}
-                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                          >
-                            <ThumbsUp className="w-3 h-3 text-gray-300 hover:text-green-500" />
-                          </button>
-                          <button 
-                            onClick={() => handleFeedback(message.id, false)}
-                            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                          >
-                            <ThumbsDown className="w-3 h-3 text-gray-300 hover:text-red-400" />
-                          </button>
-                        </div>
-                      )}
-                      {message.feedback && (
-                        <span className="text-[10px] text-gray-400">
-                          {message.feedback === 'positive' ? '✓' : '✗'}
-                        </span>
-                      )}
                     </div>
+                    <div className={`mt-1 px-3 py-2.5 rounded-lg text-sm leading-relaxed ${
+                      message.isBot 
+                        ? 'bg-[#2d2d2d] text-gray-200 border border-gray-800' 
+                        : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white'
+                    }`}>
+                      <p className="whitespace-pre-wrap font-mono text-[13px]">{message.text}</p>
+                    </div>
+                    
+                    {/* Feedback buttons for bot messages */}
+                    {message.isBot && message.id !== 1 && (
+                      <div className="flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {!message.feedback ? (
+                          <>
+                            <button 
+                              onClick={() => handleFeedback(message.id, true)}
+                              className="p-1.5 hover:bg-gray-800 rounded-md transition-colors"
+                              title="Helpful"
+                            >
+                              <ThumbsUp className="w-3.5 h-3.5 text-gray-500 hover:text-green-400" />
+                            </button>
+                            <button 
+                              onClick={() => handleFeedback(message.id, false)}
+                              className="p-1.5 hover:bg-gray-800 rounded-md transition-colors"
+                              title="Not helpful"
+                            >
+                              <ThumbsDown className="w-3.5 h-3.5 text-gray-500 hover:text-red-400" />
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-[10px] text-gray-500 px-2">
+                            {message.feedback === 'positive' ? '✓ Marked as helpful' : '✗ Marked as not helpful'}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
               
+              {/* Loading State */}
               {isLoading && (
-                <div className="flex justify-start animate-in fade-in duration-200">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6A11CB] to-[#00BF63] flex items-center justify-center mr-2">
-                    <Sparkles className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="bg-white shadow-md border border-gray-100 rounded-2xl rounded-tl-md px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 bg-[#6A11CB] rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-[#5271ff] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-[#00BF63] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Quick Actions */}
+                <div className="flex gap-3">
+                  <div classNa- Copilot Style */}
             {messages.length <= 2 && (
-              <div className="px-4 pb-2 flex gap-2 overflow-x-auto">
+              <div className="px-4 pb-2 flex gap-2 overflow-x-auto border-t border-gray-800 pt-2">
                 {quickActions.map((action) => (
                   <button
-                    key={action.label}
-                    onClick={() => handleQuickAction(action.label)}
-                    className="flex-shrink-0 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-full text-xs font-medium text-gray-700 transition-colors flex items-center gap-1"
-                  >
-                    <span>{action.icon}</span>
-                    <span>{action.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Input */}
-            <div className="p-4 border-t border-gray-100 bg-white">
-              <div className="flex items-center gap-2">
+                    ke- Copilot Style */}
+            <div className="p-3 border-t border-gray-800 bg-[#2d2d2d]">
+              <div className="flex items-end gap-2">
                 <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    placeholder="Type a message..."
+                  <textarea
+                    placeholder="Ask Copilot anything..."
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    className="w-full px-4 py-3 bg-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[#6A11CB]/20 focus:bg-white border border-transparent focus:border-[#6A11CB]/30 transition-all pr-12"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    rows={1}
+                    className="w-full px-3 py-2.5 bg-[#1e1e1e] border border-gray-700 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-all resize-none pr-10 font-mono"
+                    style={{ minHeight: '40px', maxHeight: '120px' }}
                   />
+                  <button
+                    onClick={toggleVoice}
+                    className={`absolute right-2 bottom-2 p-1.5 rounded-md transition-all ${
+                      isListening 
+                        ? 'bg-red-500/20 text-red-400' 
+                        : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
+                    }`}
+                    title={isListening ? 'Stop voice input' : 'Voice input'}
+                  >
+                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  </button>
+                </div>
+                <button 
+                  onClick={handleSendMessage} 
+                  disabled={!inputMessage.trim() || isLoading}
+                  className="p-2.5 rounded-lg flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:from-gray-700 disabled:to-gray-700"
+                  title="Send message (Enter)"
+                >
+                  <Send className="w-4 h-4 text-white" />
+                </button>
+              </div>
+              <div className="mt-2 flex items-center justify-between text-[10px] font-mono text-gray-600">
+                <span>Press Enter to send, Shift+Enter for new line</span>
+                <span className="text-purple-500">Powered by AI</span>                  />
                   <button
                     onClick={toggleVoice}
                     className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-colors ${
