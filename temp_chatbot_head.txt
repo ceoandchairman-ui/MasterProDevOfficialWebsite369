@@ -1,0 +1,12 @@
+﻿
+import React, { useState, useEffect, useRef } from 'react';
+import { Button } from "@/components/ui/button";
+import { X, Send, Mic, MicOff, ThumbsUp, ThumbsDown, Sparkles, MessageCircle } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { Service } from '@/entities/Service';
+import { Consultant } from '@/entities/Consultant';
+
+
+export default function FloatingChatbot() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [mess

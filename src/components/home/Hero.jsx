@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Bot, Rocket, AlertCircle, Building, TrendingUp, Users, Target, Briefcase } from 'lucide-react';
+import { Bot, Rocket, AlertCircle, Building, TrendingUp, Users, Target, Briefcase, Search } from 'lucide-react';
+import { createPageUrl } from '@/utils';
 
 const highlightKeywords = (text) => {
   const keywords = {
@@ -46,6 +46,7 @@ export default function Hero() {
   const [isVisible, setIsVisible] = useState(false);
   const [visibleMilestones, setVisibleMilestones] = useState([]);
   const [hoveredMilestone, setHoveredMilestone] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const chartRef = useRef(null);
 
   // Actual MasterProDev services data
@@ -166,6 +167,13 @@ export default function Hero() {
     };
   }, [isVisible]);
 
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = createPageUrl('SearchResults') + '?q=' + encodeURIComponent(searchQuery);
+    }
+  };
+
   const milestones = [
     {
       id: 1,
@@ -256,32 +264,33 @@ export default function Hero() {
   };
 
   return (
-    <div className="relative bg-gray-50">
+    <div className="relative bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-center mb-6">
           <div 
-            className="bg-white border-3 border-solid px-6 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            className="bg-white border-3 border-solid px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             style={{ 
               borderColor: '#5271ff',
-              boxShadow: '0 4px 12px rgba(82, 113, 255, 0.15)'
+              boxShadow: '0 6px 20px rgba(82, 113, 255, 0.2)'
             }}
           >
-            <h1 className="text-xl md:text-2xl font-bold text-black flex items-center gap-2">
-              🚀 <span>Welcome to MasterProDev</span>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900 flex items-center justify-center gap-3">
+              <span className="text-2xl">🚀</span>
+              <span>Welcome to MasterProDev</span>
             </h1>
           </div>
         </div>
 
         <div 
-          className="rounded-[50px] p-6 md:p-10 border-3 border-solid"
+          className="rounded-3xl p-8 md:p-12 border-4 border-solid"
           style={{
             backgroundColor: '#ffffff',
             borderColor: '#5271ff',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            boxShadow: '0 10px 30px rgba(82, 113, 255, 0.1)'
           }}
         >
-          <section id="home" className="relative text-black overflow-hidden min-h-[85vh] flex items-center">
-            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 text-center z-10">
+          <section id="home" className="relative text-black overflow-hidden min-h-[90vh] flex items-center justify-center">
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
               <div className="mb-6">
                 <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
                   <span style={{ color: '#ffb400' }}>Master</span>
@@ -291,6 +300,23 @@ export default function Hero() {
                 <p className="text-lg md:text-xl mb-3 text-gray-700">
                   Elite AI Consultants 👨‍💼 Transforming Careers 🚀 & Businesses 🏢 Building Success Stories 🏆
                 </p>
+              </div>
+
+              <div className="mt-8 max-w-xl mx-auto">
+                <form onSubmit={handleSearchSubmit} className="w-full crt-search-container rounded-full bg-gray-900 shadow-inner">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search for services or consultants..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="crt-search-input w-full pl-5 pr-12 py-3 text-green-300 placeholder-green-700 bg-transparent border-0 rounded-full focus:ring-0"
+                    />
+                    <button type="submit" className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-green-500 hover:text-green-400 transition-colors">
+                      <Search className="w-5 h-5" />
+                    </button>
+                  </div>
+                </form>
               </div>
               
               <div className="mb-8" ref={chartRef}>

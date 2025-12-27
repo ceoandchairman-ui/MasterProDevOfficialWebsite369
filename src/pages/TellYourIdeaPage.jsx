@@ -242,9 +242,13 @@ export default function TellYourIdeaPage() {
                 </TabsList>
 
                 <TabsContent value="query">
-                  <div className="p-4 bg-[#ffb400] border-2 border-black rounded-lg space-y-4">
-                    <Textarea placeholder="Type your idea, question, or challenge here..." value={textQuery} onChange={(e) => setTextQuery(e.target.value)} className="min-h-[100px]" />
-                    <Button type="button" onClick={handleAddTextQuery} disabled={!textQuery.trim()} className="bg-[#5271ff] text-white hover:bg-[#00bf63] hover:text-white">Add Text to Submission</Button>
+                  <div className="p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 border-3 border-[#ffb400] rounded-xl space-y-4">
+                    <label className="block text-sm font-semibold text-gray-800 mb-2">Share Your Idea or Challenge</label>
+                    <Textarea placeholder="Type your idea, question, or challenge here..." value={textQuery} onChange={(e) => setTextQuery(e.target.value)} className="min-h-[120px] bg-white border-2 border-gray-300 focus:border-[#ffb400]" />
+                    <Button type="button" onClick={handleAddTextQuery} disabled={!textQuery.trim()} className="w-full bg-[#5271ff] text-white hover:bg-[#00bf63] font-semibold py-3 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                      ✓ Add Text to Submission
+                    </Button>
+                    {textQuery.trim() && <p className="text-xs text-gray-600">Ready to add this to your submission</p>}
                   </div>
                 </TabsContent>
 

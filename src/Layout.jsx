@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { User } from '@/entities/User';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from './utils';
 import FloatingChatbot from './components/shared/FloatingChatbot';
 import { 
@@ -19,6 +19,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Layout({ children, currentPageName }) {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isLoadingUser, setIsLoadingUser] = useState(true); // New state to track user loading
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -45,7 +46,12 @@ export default function Layout({ children, currentPageName }) {
   };
   
   const handleLogin = () => {
-    User.login();
+    navigate('/login');
+    setMobileMenuOpen(false);
+  };
+
+  const handleSignup = () => {
+    navigate('/signup');
     setMobileMenuOpen(false);
   };
 
@@ -371,7 +377,7 @@ export default function Layout({ children, currentPageName }) {
 
             <div className="space-y-6">
               <h3 className="text-lg font-semibold brand-green">Follow Us</h3>
-              <div className="space-y-6">
+              <div className="grid grid-cols-3 gap-x-6 gap-y-4">
 
                 <a href="https://www.instagram.com/masterprodev/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group social-link">
                                         <div className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 group-hover:brightness-125" style={{ background: 'linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7)' }}>

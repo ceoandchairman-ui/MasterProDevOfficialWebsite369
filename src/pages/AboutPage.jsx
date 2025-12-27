@@ -452,6 +452,7 @@ export default function AboutPage() {
                 className="stat-card bg-white/10 backdrop-blur-sm p-6 rounded-xl border-2"
                 style={{ 
                   borderColor: '#ffde59',
+                  backgroundColor: 'rgba(255, 222, 89, 0.1)',
                   boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
                 }}
               >
@@ -465,6 +466,7 @@ export default function AboutPage() {
                 className="stat-card bg-white/10 backdrop-blur-sm p-6 rounded-xl border-2"
                 style={{ 
                   borderColor: '#5271ff',
+                  backgroundColor: 'rgba(82, 113, 255, 0.1)',
                   boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
                 }}
               >
@@ -478,6 +480,7 @@ export default function AboutPage() {
                 className="stat-card bg-white/10 backdrop-blur-sm p-6 rounded-xl border-2"
                 style={{ 
                   borderColor: '#00bf63',
+                  backgroundColor: 'rgba(0, 191, 99, 0.1)',
                   boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
                 }}
               >
@@ -491,6 +494,7 @@ export default function AboutPage() {
                 className="stat-card bg-white/10 backdrop-blur-sm p-6 rounded-xl border-2"
                 style={{ 
                   borderColor: '#ffde59',
+                  backgroundColor: 'rgba(255, 222, 89, 0.1)',
                   boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
                 }}
               >
@@ -503,7 +507,8 @@ export default function AboutPage() {
               <div 
                 className="stat-card bg-white/10 backdrop-blur-sm p-6 rounded-xl border-2"
                 style={{ 
-                  borderColor: '#00bf63',
+                  borderColor: '#5271ff',
+                  backgroundColor: 'rgba(82, 113, 255, 0.1)',
                   boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
                 }}
               >
@@ -511,12 +516,13 @@ export default function AboutPage() {
                   <CheckCircle className="stat-icon-check w-6 h-6" style={{ color: '#00bf63' }} />
                   <div className="text-3xl font-bold text-[#00bf63]">{animatedStats.efficiency}%</div>
                 </div>
-                <div className="text-sm text-white">Improved Efficiency</div>
+                <div className="text-sm text-white">Efficiency Boost</div>
               </div>
               <div 
                 className="stat-card bg-white/10 backdrop-blur-sm p-6 rounded-xl border-2"
                 style={{ 
-                  borderColor: '#5271ff',
+                  borderColor: '#00bf63',
+                  backgroundColor: 'rgba(0, 191, 99, 0.1)',
                   boxShadow: '0 8px 20px rgba(0,0,0,0.15)'
                 }}
               >

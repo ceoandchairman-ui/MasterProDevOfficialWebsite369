@@ -130,9 +130,9 @@ export default function ServicesPage() {
         <div 
           className="rounded-[60px] p-8 md:p-12 border-3 border-solid relative"
           style={{
-            backgroundColor: '#ffde59',
-            borderColor: '#ffde59',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            backgroundColor: '#f0f2f5',
+            borderColor: '#e5e7eb',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
           }}
         >
           <div className="absolute -top-6 right-12">
@@ -154,10 +154,10 @@ export default function ServicesPage() {
 
           <section className="mt-6">
             <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold text-black mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
                 Comprehensive AI Solutions
               </h1>
-              <p className="text-xl text-black">Explore our innovative solutions organized by our core AI pillars.</p>
+              <p className="text-xl text-gray-600">Explore our innovative solutions organized by our core AI pillars.</p>
             </div>
 
             <div className="mt-16 space-y-6">

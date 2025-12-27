@@ -172,71 +172,80 @@ export default function HireConsultant() {
         {/* Consultant Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredConsultants.map(consultant => (
-            <Card key={consultant.id} className="hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-blue-300">
-              <CardHeader>
+            <Card 
+              key={consultant.id} 
+              className="bg-white/60 backdrop-blur-sm rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border-2 border-transparent hover:border-blue-400/50"
+            >
+              <CardHeader className="p-6">
                 <div className="flex items-start gap-4">
-                  <img 
-                    src={consultant.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"} 
-                    alt={consultant.name}
-                    className="w-20 h-20 rounded-full object-cover"
-                  />
+                  <div className="relative flex-shrink-0">
+                    <img 
+                      src={consultant.photoUrl || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"} 
+                      alt={consultant.name}
+                      className="w-24 h-24 rounded-full object-cover border-4 border-white/80 shadow-lg"
+                    />
+                    <span className="absolute bottom-1 right-1 block h-4 w-4 rounded-full bg-green-500 border-2 border-white ring-2 ring-green-500/50"></span>
+                  </div>
                   <div className="flex-1">
-                    <CardTitle className="text-xl mb-1">{consultant.name}</CardTitle>
-                    <CardDescription className="text-sm">{consultant.title}</CardDescription>
+                    <CardTitle className="text-2xl mb-1 text-gray-800 group-hover:text-blue-600 transition-colors">{consultant.name}</CardTitle>
+                    <CardDescription className="text-base text-blue-800/80 font-medium">{consultant.title}</CardDescription>
                     {consultant.averageRating && (
-                      <div className="flex items-center gap-1 mt-2">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-semibold">{consultant.averageRating.toFixed(1)}</span>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                        <span className="text-base font-bold text-gray-700">{consultant.averageRating.toFixed(1)}</span>
+                        <span className="text-sm text-gray-500">(0 reviews)</span>
                       </div>
                     )}
                   </div>
                 </div>
               </CardHeader>
               
-              <CardContent className="space-y-4">
-                <p className="text-sm text-gray-600 line-clamp-2">{consultant.tagline}</p>
+              <CardContent className="px-6 pb-4 space-y-4">
+                <p className="text-base text-gray-700 line-clamp-3 h-[72px]">{consultant.tagline}</p>
                 
-                <div className="flex flex-wrap gap-2">
-                  {consultant.servicesOffered?.slice(0, 3).map(service => (
-                    <Badge key={service} variant="secondary" className="text-xs">
-                      {service}
-                    </Badge>
-                  ))}
-                  {consultant.servicesOffered?.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{consultant.servicesOffered.length - 3} more
-                    </Badge>
-                  )}
+                <div className="h-[60px] overflow-y-auto">
+                  <div className="flex flex-wrap gap-2">
+                    {consultant.servicesOffered?.map(service => (
+                      <Badge key={service} variant="secondary" className="text-sm bg-blue-100 text-blue-800 border border-blue-200/80">
+                        {service}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="space-y-2 text-sm text-gray-600">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-400" />
+                <div className="border-t border-gray-200/80 my-4"></div>
+
+                <div className="space-y-3 text-base text-gray-800">
+                  <div className="flex items-center gap-3">
+                    <MapPin className="w-5 h-5 text-gray-500 flex-shrink-0" />
                     <span>{consultant.location}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Languages className="w-4 h-4 text-gray-400" />
+                  <div className="flex items-center gap-3">
+                    <Languages className="w-5 h-5 text-gray-500 flex-shrink-0" />
                     <span>{consultant.languages?.join(', ')}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-green-600" />
-                    <span className="font-semibold text-green-600">
-                      ${consultant.hourlyRate}/hr | Min: ${consultant.minBudget}
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="w-5 h-5 text-green-600 flex-shrink-0" />
+                    <span className="font-bold text-green-700">
+                      ${consultant.hourlyRate}/hr
                     </span>
+                    <span className="text-gray-600 text-sm">(min budget: ${consultant.minBudget})</span>
                   </div>
                 </div>
               </CardContent>
 
-              <CardFooter className="flex gap-2">
-                <Link to={createPageUrl('ConsultantDetail') + '?id=' + consultant.id} className="flex-1">
-                  <Button variant="outline" className="w-full">
-                    View Profile
+              <CardFooter className="p-6 bg-gray-50/50">
+                <div className="flex gap-3 w-full">
+                  <Link to={createPageUrl('ConsultantDetail') + '?id=' + consultant.id} className="flex-1">
+                    <Button variant="outline" className="w-full h-11 text-base border-gray-300 hover:bg-gray-100 hover:border-gray-400">
+                      View Profile
+                    </Button>
+                  </Link>
+                  <Button className="flex-1 h-11 text-base bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-shadow">
+                    <Mail className="w-4 h-4 mr-2" />
+                    Contact
                   </Button>
-                </Link>
-                <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Contact
-                </Button>
+                </div>
               </CardFooter>
             </Card>
           ))}

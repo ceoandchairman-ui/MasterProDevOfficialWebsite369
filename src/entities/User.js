@@ -40,9 +40,13 @@ export class User {
     }
   }
 
-  static async register(userData) {
+  static async register(name, email, password) {
     try {
-      const response = await apiClient.post('/auth/register', userData);
+      const response = await apiClient.post('/auth/signup', { 
+        name, 
+        email, 
+        password 
+      });
       if (response.token) {
         localStorage.setItem('auth_token', response.token);
       }
