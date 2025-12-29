@@ -224,18 +224,4 @@ ${formData.message}
       </div>
     </div>
   );
-              </div>
-  );
-}
-
-      <style jsx>{`
-        .icon-wrapper {
-          transition: filter 0.3s ease-in-out;
-        }
-        .icon-wrapper:hover {
-          filter: brightness(1.15);
-        }
-      `}</style>
-    </div>
-  );
 }
