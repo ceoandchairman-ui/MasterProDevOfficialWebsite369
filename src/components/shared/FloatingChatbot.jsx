@@ -448,23 +448,12 @@ Respond helpfully and concisely.`;
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white">
+            {/* Messages - Copilot Chat Style */}
+            <div ref={messagesEndRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#1e1e1e] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
               {messages.map(message => (
                 <div 
                   key={message.id} 
-                  className={`flex ${message.isBot ? 'justify-start' : 'justify-end'} animate-in fade-in slide-in-from-bottom-2 duration-200`}
-                >
-                  {message.isBot && (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6A11CB] to-[#00BF63] flex items-center justify-center mr-2 flex-shrink-0">
-                      <Sparkles className="w-4 h-4 text-white" />
-                    </div>
-                  )}- Copilot Chat Style */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#1e1e1e] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-              {messages.map(message => (
-                <div 
-                  key={message.id} 
-                  className={`flex gap-3 ${message.isBot ? '' : 'flex-row-reverse'} group`}
+                  className={`flex gap-3 ${message.isBot ? '' : 'flex-row-reverse'} group animate-in fade-in slide-in-from-bottom-2 duration-200`}
                 >
                   {/* Avatar */}
                   <div className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center ${
@@ -527,28 +516,30 @@ Respond helpfully and concisely.`;
               
               {/* Loading State */}
               {isLoading && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 p-4">
                   <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
                   <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse delay-75"></div>
                   <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse delay-150"></div>
                 </div>
               )}
-
-              {messages.length <= 2 && (
-                <div className="px-4 pb-2 flex gap-2 overflow-x-auto border-t border-gray-800 pt-2">
-                  {quickActions.map((action) => (
-                    <button
-                      key={action.text}
-                      onClick={() => handleQuickAction(action.text)}
-                      className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-full whitespace-nowrap transition-colors"
-                    >
-                      {action.text}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
+            {/* Quick Actions */}
+            {messages.length <= 2 && !isLoading && (
+              <div className="px-4 py-2 flex gap-2 overflow-x-auto border-t border-gray-800">
+                {quickActions.map((action) => (
+                  <button
+                    key={action.label}
+                    onClick={() => handleQuickAction(action.label)}
+                    className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-full whitespace-nowrap transition-colors"
+                  >
+                    {action.icon} {action.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Input Area */}
             <div className="p-3 border-t border-gray-800 bg-[#2d2d2d]">
               <div className="flex items-end gap-2">
                 <div className="flex-1 relative">
@@ -556,12 +547,7 @@ Respond helpfully and concisely.`;
                     placeholder="Ask Copilot anything..."
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
+                    onKeyPress={handleKeyPress}
                     rows={1}
                     className="w-full px-3 py-2.5 bg-[#1e1e1e] border border-gray-700 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-all resize-none pr-10 font-mono"
                     style={{ minHeight: '40px', maxHeight: '120px' }}
@@ -589,27 +575,7 @@ Respond helpfully and concisely.`;
               </div>
               <div className="mt-2 flex items-center justify-between text-[10px] font-mono text-gray-600">
                 <span>Press Enter to send, Shift+Enter for new line</span>
-                <span className="text-purple-500">Powered by AI</span>                  />
-                  <button
-                    onClick={toggleVoice}
-                    className={`absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-colors ${
-                      isListening ? 'bg-red-100 text-red-500' : 'text-gray-400 hover:text-gray-600'
-                    }`}
-                  >
-                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                  </button>
-                </div>
-                <button 
-                  onClick={handleSendMessage} 
-                  disabled={!inputMessage.trim() || isLoading}
-                  className="w-11 h-11 rounded-full flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
-                  style={{
-                    background: inputMessage.trim() ? 'linear-gradient(135deg, #6A11CB 0%, #5271ff 100%)' : '#e5e7eb'
-                  }}
-                >
-                  <Send className={`w-5 h-5 ${inputMessage.trim() ? 'text-white' : 'text-gray-400'}`} />
-                </button>
-
+                <span className="text-purple-500">Powered by AI</span>
               </div>
             </div>
           </div>
