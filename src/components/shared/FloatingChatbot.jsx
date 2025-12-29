@@ -527,13 +527,28 @@ Respond helpfully and concisely.`;
               
               {/* Loading State */}
               {isLoading && (
-                <div className="flex gap-3">
-                  <div classNa- Copilot Style */}
-            {messages.length <= 2 && (
-              <div className="px-4 pb-2 flex gap-2 overflow-x-auto border-t border-gray-800 pt-2">
-                {quickActions.map((action) => (
-                  <button
-                    ke- Copilot Style */}
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse"></div>
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse delay-75"></div>
+                  <div className="w-2 h-2 rounded-full bg-gray-400 animate-pulse delay-150"></div>
+                </div>
+              )}
+
+              {messages.length <= 2 && (
+                <div className="px-4 pb-2 flex gap-2 overflow-x-auto border-t border-gray-800 pt-2">
+                  {quickActions.map((action) => (
+                    <button
+                      key={action.text}
+                      onClick={() => handleQuickAction(action.text)}
+                      className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-full whitespace-nowrap transition-colors"
+                    >
+                      {action.text}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="p-3 border-t border-gray-800 bg-[#2d2d2d]">
               <div className="flex items-end gap-2">
                 <div className="flex-1 relative">
