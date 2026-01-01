@@ -214,13 +214,12 @@ YOUR ROLE:
     setIsLoading(true);
 
     try {
-
       const siteContext = buildDynamicContext();
       const recentMessages = messages.slice(-6).map(m => 
         `${m.isBot ? 'Assistant' : 'User'}: ${m.text}`
       ).join('\n');
       
-      let prompt = `${siteContext}
+      const fullPrompt = `${siteContext}
 
 RECENT CONVERSATION:
 ${recentMessages}
@@ -229,32 +228,43 @@ USER'S MESSAGE: ${inputMessage}
 
 Respond helpfully and concisely.`;
 
-      const response = await base44.integrations.Core.InvokeLLM({
-
-        prompt: prompt,
-        add_context_from_internet: false
+      // Call your new FastAPI backend endpoint
+      const response = await fetch('http://localhost:5000/api/v1/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: fullPrompt }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'An error occurred with the API.');
+      }
+
+      // Assuming the AI agent's response is in a format like { "response": "..." }
+      // You may need to adjust this based on the actual response structure of your AI Agent
+      const data = await response.json();
+      const botResponseText = data.response || "Sorry, I couldn't get a valid response.";
+
 
       setMessages(prev => [...prev, {
-
         id: Date.now() + 1,
-        text: response,
+        text: botResponseText,
         isBot: true,
         timestamp: new Date()
-
       }]);
     } catch (error) {
+      console.error("Chat API Error:", error);
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
-        text: "Sorry, I'm having trouble right now. Please try again or email masterprodevconsultant@outlook.com",
+        text: `Sorry, I'm having trouble connecting to my brain right now. Please try again later. \nError: ${error.message}`,
         isBot: true,
         timestamp: new Date()
       }]);
-
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleKeyPress = (e) => {
