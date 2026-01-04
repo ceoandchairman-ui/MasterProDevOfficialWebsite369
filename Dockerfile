@@ -16,8 +16,8 @@ RUN npm run build
 FROM caddy:2-alpine
 WORKDIR /usr/share/caddy
 
-# Copy the Caddyfile
-COPY Caddyfile /etc/caddy/Caddyfile
+# Copy the Caddyfile from the build stage
+COPY --from=build /app/Caddyfile /etc/caddy/Caddyfile
 
 # Copy the built application from the build stage
 COPY --from=build /app/dist .
