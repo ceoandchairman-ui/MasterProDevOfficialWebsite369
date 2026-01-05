@@ -1,0 +1,12 @@
+{
+	# Bind to all network interfaces on port 80
+	bind :80
+}
+
+# Serve the static files from the current directory
+file_server
+
+# Fallback for single-page applications (SPA)
+# This ensures that requests to any path will serve the index.html file,
+# allowing client-side routing to handle the request.
+try_files {path} /index.html
