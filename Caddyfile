@@ -1,12 +1,14 @@
 {
-	# Bind to all network interfaces on port 80
 	bind :80
 }
 
-# Serve the static files from the current directory
-file_server
-
-# Fallback for single-page applications (SPA)
-# This ensures that requests to any path will serve the index.html file,
-# allowing client-side routing to handle the request.
-try_files {path} /index.html
+# Serve static files and handle SPA routing
+:80 {
+	root * /usr/share/caddy
+	
+	# Try to serve the file if it exists, otherwise serve index.html for SPA routing
+	try_files {path} /index.html
+	
+	# Serve static files
+	file_server
+}
