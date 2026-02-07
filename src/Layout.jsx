@@ -66,7 +66,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Home', href: createPageUrl('Home') },
     { name: 'About', href: createPageUrl('AboutPage') },
     { name: 'Services', href: createPageUrl('ServicesPage') },
-    { name: 'Hire a Consultant', href: createPageUrl('HireConsultant') },
+    { name: 'Hire Experts', href: createPageUrl('HireConsultant') },
     { name: 'Contact Us', href: createPageUrl('ContactPage') },
   ];
 

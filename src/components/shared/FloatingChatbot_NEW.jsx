@@ -9,7 +9,7 @@ export default function FloatingChatbot() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hi there! 👋 I'm your MasterProDev Copilot. How can I help you today?",
+      text: "Hi there! 👋 I'm your MasterProDev Copilot. Need help with Business Optimization, Sales, or Tech?",
       isBot: true,
       timestamp: new Date()
     }

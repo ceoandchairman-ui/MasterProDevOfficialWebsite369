@@ -426,10 +426,10 @@ export default function AboutPage() {
                   "Execution is the only strategy that matters."
                 </p>
                 <p className="mt-4 text-lg text-gray-700 leading-relaxed">
-                  At <span className="font-bold">MasterProDev</span>, we don't just give advice. We build systems. From <span className="font-semibold text-blue-600">AI Agents</span> to <span className="font-semibold text-green-600">Enterprise Software</span> and <span className="font-semibold text-amber-600">Strategic Career Brands</span>, we bridge the gap between thinking and doing.
+                  At <span className="font-bold">MasterProDev</span>, we don't just give advice. We build systems. From <span className="font-semibold text-blue-600">Sales & Marketing Engines</span> to <span className="font-semibold text-green-600">Enterprise Software</span> and <span className="font-semibold text-amber-600">Business Strategy</span>, we bridge the gap between thinking and doing.
                 </p>
                 <p className="mt-4 text-lg text-gray-700 leading-relaxed">
-                  Too many consultants leave you with a slide deck. <span className="font-bold border-b-2 border-[#00bf63]">We leave you with a working system.</span> Whether you are a founder, a job-seeker, or an enterprise leader, our mission is to provide clarity, reliability, and long-term value.
+                  Too many consultants leave you with a slide deck. <span className="font-bold border-b-2 border-[#00bf63]">We leave you with a working system.</span> Whether you need to optimize revenue, automate operations, or pivot your career, our mission is to provide clarity, reliability, and long-term value.
                 </p>
                 <p className="mt-4 text-lg text-gray-700 leading-relaxed">
                   We document every step, ensure you own your data, and train you to manage what we build. No black boxes. Just results.

@@ -114,13 +114,13 @@ export default function AboutSection() {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div className="order-2 md:order-1">
                 <p className="mt-4 text-base text-white leading-relaxed">
-                  At <span style={{ color: '#ffde59' }}>Master</span><span style={{ color: '#ffffff' }}>Pro</span><span style={{ color: '#00bf63' }}>Dev</span>, we follow one simple principle: <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>we implement, document, and hand over systems that work<Sparkles className="sparkle-icon w-3 h-3" style={{ color: '#ffde59' }} /></span>.
+                  At <span style={{ color: '#ffde59' }}>Master</span><span style={{ color: '#ffffff' }}>Pro</span><span style={{ color: '#00bf63' }}>Dev</span>, we follow one simple principle: <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>we optimize, build, and hand over systems that work<Sparkles className="sparkle-icon w-3 h-3" style={{ color: '#ffde59' }} /></span>.
                 </p>
                 <p className="mt-3 text-base text-white leading-relaxed">
-                  We are not just consultants; we are builders. Whether you are an individual needing a <span className="keyword-highlight font-bold" style={{ color: '#00bf63' }}>standout career brand</span>, a founder launching a <span className="keyword-highlight font-bold" style={{ color: '#00bf63' }}>digital product</span>, or an enterprise scaling <span className="keyword-highlight font-bold" style={{ color: '#00bf63' }}>software & infrastructure</span>, we bridge the gap between thinking and doing.
+                  We are not just consultants; we are builders. Whether you are an individual needing a <span className="keyword-highlight font-bold" style={{ color: '#00bf63' }}>career pivot</span>, a founder launching a <span className="keyword-highlight font-bold" style={{ color: '#00bf63' }}>sales pipeline</span>, or an enterprise scaling <span className="keyword-highlight font-bold" style={{ color: '#00bf63' }}>revenue operations</span>, we bridge the gap between thinking and doing.
                 </p>
                 <p className="mt-3 text-base text-white leading-relaxed">
-                  Our services cover the full spectrum of modern execution: from <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>Software Development</span> and <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>AI Engineering</span> to <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>Strategic Consulting</span>. We deliver assets you own, systems you can control, and results you can measure.
+                  Our services cover the full spectrum of modern execution: from <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>Sales & Marketing Optimization</span> to <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>AI Engineering</span> and <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>Software Development</span>. We deliver assets you own, strategies that convert, and results you can measure.
                 </p>
               </div>
               <div className="order-1 md:order-2">

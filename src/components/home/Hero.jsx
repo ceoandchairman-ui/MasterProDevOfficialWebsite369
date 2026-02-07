@@ -277,7 +277,10 @@ export default function Hero() {
                   <span style={{ color: '#00bf63' }}>Dev</span>
                 </h1>
                 <p className="text-lg md:text-xl mb-3 text-gray-700">
-                  <span className="font-semibold text-blue-600">AI</span> & <span className="font-semibold text-green-600">Tech</span> Consulting 💻 We Implement Systems That Work 🚀
+                  <span className="font-semibold text-blue-600">Business</span>, <span className="font-semibold text-amber-500">Sales</span> & <span className="font-semibold text-green-600">Tech</span> Implementation 🚀
+                </p>
+                <p className="text-base text-gray-600 mb-6 font-medium">
+                  We don't just write code. We optimize businesses, build sales pipelines, and deploy systems that scale.
                 </p>
               </div>
 
@@ -286,7 +289,7 @@ export default function Hero() {
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search services (e.g., 'Resume', 'IoT', 'DevOps')..."
+                      placeholder="Search services (e.g., 'Sales Pipeline', 'App Dev', 'Business Strategy')..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="crt-search-input w-full pl-5 pr-12 py-3 text-green-300 placeholder-green-700 bg-transparent border-0 rounded-full focus:ring-0"
