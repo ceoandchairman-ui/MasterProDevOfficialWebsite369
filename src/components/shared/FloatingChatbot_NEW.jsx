@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Send, Mic, MicOff, ThumbsUp, ThumbsDown, Sparkles } from 'lucide-react';
+import { X, Send, Mic, MicOff, ThumbsUp, ThumbsDown, Sparkles, Minimize2, MessageSquare, Bot, User } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Service } from '@/entities/Service';
 import { Consultant } from '@/entities/Consultant';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export default function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hi there! 👋 I'm your MasterProDev Copilot. Need help with Business Optimization, Sales, or Tech?",
+      text: "Hi there! 👋 I'm Armosa, your MasterProDev guide. Need help with Business Optimization, Sales, or Tech Implementation?",
       isBot: true,
       timestamp: new Date()
     }
@@ -124,12 +126,12 @@ export default function FloatingChatbot() {
     ).join('\n');
 
     return `
-You are the AI assistant for MasterProDev - a leading AI consulting company based in Toronto, ON, Canada.
+You are Armosa, the AI assistant for MasterProDev - a leading System Implementation, Business Optimization & Sales company.
 
 COMPANY OVERVIEW:
 - Email: masterprodevconsultant@outlook.com
 - Location: Toronto, ON, Canada
-- Mission: Empower professionals and businesses through AI transformation
+- Mission: Empower professionals and businesses through AI transformation & System Implementation.
 
 OUR SERVICES (REAL-TIME DATA):
 ${servicesList || 'No services available at the moment.'}
@@ -331,233 +333,158 @@ Respond helpfully and concisely.`;
     };
   }, [isOpen, isHovering]);
 
-  // Quick action buttons
-  const quickActions = [
-    { label: "Services", icon: "💼" },
-    { label: "Consultants", icon: "👨‍💼" },
-    { label: "Pricing", icon: "💰" }
-  ];
-
-  const handleQuickAction = (action) => {
-    setInputMessage(`Tell me about your ${action.toLowerCase()}`);
-  };
-
   return (
     <>
-      {/* Floating Button */}
-      <div 
-        className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3"
-        style={{ zIndex: 9999 }}
-      >
-        {/* Thought Bubble */}
-        {showBubble && !isOpen && (
-          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="relative bg-white rounded-2xl px-4 py-3 shadow-xl border border-gray-100 max-w-[200px]">
-              <p className="text-sm font-medium text-gray-800">{bubbleMessage}</p>
-              <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white border-r border-b border-gray-100 transform rotate-45"></div>
-            </div>
-          </div>
-        )}
-
-        {/* Main Button - Copilot Style */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          className="group relative w-14 h-14 rounded-2xl shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl bg-gradient-to-br from-purple-600 to-blue-600"
-        >
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
-          <div className="relative w-full h-full rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-white group-hover:rotate-12 transition-transform" />
-          </div>
-        </button>
-      </div>
-
-      {/* Chat Window */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setIsOpen(false)}
-          ></div>
+      {/* Floating Toggle Button (App Style) */}
+      {!isOpen && (
+        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2"
+             style={{ zIndex: 9999 }}>
           
-          {/* Chat Container - Copilot Style */}
-          <div className="relative w-full sm:w-[420px] h-[90vh] sm:h-[680px] sm:max-h-[85vh] bg-[#1e1e1e] sm:rounded-xl shadow-2xl flex flex-col overflow-hidden border border-gray-800">
+          {/* Thought Bubble */}
+          <div className={cn(
+            "bg-white rounded-2xl p-4 shadow-xl border border-gray-100 max-w-[200px] transform transition-all duration-300 origin-bottom-right mb-2 text-start",
+            showBubble ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-4 pointer-events-none"
+          )}>
+             <p className="text-gray-800 text-sm font-medium leading-relaxed">
+               {bubbleMessage}
+             </p>
+             <div className="absolute -bottom-2 right-6 w-4 h-4 bg-white transform rotate-45 border-b border-r border-gray-100"></div>
+          </div>
+
+          <Button
+            onClick={() => { setIsOpen(true); setShowBubble(false); }}
+            className="h-14 w-14 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transition-all duration-300 group flex items-center justify-center p-0"
+          >
+            <div className="relative">
+               <MessageSquare className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
+               <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-indigo-600 rounded-full"></span>
+            </div>
+          </Button>
+        </div>
+      )}
+
+      {/* OPEN STATE: SMARTPHONE CHASSIS */}
+      {isOpen && (
+      <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+        
+        {/* Chassis Container with Gradient Border */}
+        <div className="relative h-[650px] w-[380px] rounded-[2.5rem] p-[2px] shadow-2xl transition-all">
+          
+          {/* Animated Gradient Border */}
+          <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-blue-500 via-yellow-400 to-green-500 animate-gradient-xy -z-10" />
+          
+          {/* Main Black Body */}
+          <div className="h-full w-full bg-[#0a0a0a] rounded-[calc(2.5rem-2px)] flex flex-col relative overflow-hidden">
             
-            {/* Header - VS Code Style */}
-            <div className="relative bg-gradient-to-r from-[#2d2d2d] to-[#1e1e1e] border-b border-gray-800">
-              <div className="px-4 py-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
-                    <Sparkles className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-white text-sm">MasterProDev Copilot</h3>
-                      <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-[10px] font-medium rounded border border-purple-500/30">AI</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-gray-400 text-[11px] font-mono">Ready to assist</span>
-                    </div>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setIsOpen(false)}
-                  className="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center transition-colors group"
-                >
-                  <X className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
-                </button>
+            {/* Header Island */}
+            <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 w-[85%]">
+              <div className="bg-[#1e1e1e]/80 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center justify-between shadow-lg">
+                 <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-white" />
+                   </div>
+                   <div className="flex flex-col">
+                     <span className="text-white text-xs font-bold tracking-wide">ARMOSA</span>
+                     <div className="flex items-center gap-1">
+                       <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                       <span className="text-[10px] text-gray-400">Online</span>
+                     </div>
+                   </div>
+                 </div>
+                 
+                 <button 
+                   onClick={() => setIsOpen(false)}
+                   className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
+                 >
+                   <Minimize2 className="w-4 h-4 text-gray-400" />
+                 </button>
               </div>
             </div>
 
-            {/* Messages - Copilot Chat Style */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#1e1e1e] scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-              {messages.map(message => (
-                <div 
-                  key={message.id} 
-                  className={`flex gap-3 ${message.isBot ? '' : 'flex-row-reverse'} group`}
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto px-5 pt-24 pb-28 scrollbar-hide">
+              {messages.map((msg, index) => (
+                <div
+                  key={msg.id || index}
+                  className={cn(
+                    "mb-4 flex flex-col max-w-[85%]",
+                    msg.isBot ? "self-start items-start" : "self-end items-end ml-auto"
+                  )}
                 >
-                  {/* Avatar */}
-                  <div className={`flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center ${
-                    message.isBot 
-                      ? 'bg-gradient-to-br from-purple-500 to-blue-500' 
-                      : 'bg-gradient-to-br from-blue-600 to-cyan-600'
-                  }`}>
-                    {message.isBot ? (
-                      <Sparkles className="w-4 h-4 text-white" />
-                    ) : (
-                      <span className="text-white text-xs font-bold">You</span>
+                  <div
+                    className={cn(
+                      "px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm",
+                      msg.isBot 
+                        ? "bg-[#1e1e1e] text-gray-100 border border-white/5 rounded-tl-sm"
+                        : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-sm"
                     )}
+                  >
+                    {msg.text}
                   </div>
                   
-                  {/* Message Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className={`${message.isBot ? 'text-left' : 'text-right'}`}>
-                      <span className="text-[11px] font-mono text-gray-500 px-1">
-                        {message.isBot ? 'Copilot' : 'You'} • {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                    <div className={`mt-1 px-3 py-2.5 rounded-lg text-sm leading-relaxed ${
-                      message.isBot 
-                        ? 'bg-[#2d2d2d] text-gray-200 border border-gray-800' 
-                        : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white'
-                    }`}>
-                      <p className="whitespace-pre-wrap font-mono text-[13px]">{message.text}</p>
-                    </div>
-                    
-                    {/* Feedback buttons for bot messages */}
-                    {message.isBot && message.id !== 1 && (
-                      <div className="flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {!message.feedback ? (
-                          <>
-                            <button 
-                              onClick={() => handleFeedback(message.id, true)}
-                              className="p-1.5 hover:bg-gray-800 rounded-md transition-colors"
-                              title="Helpful"
-                            >
-                              <ThumbsUp className="w-3.5 h-3.5 text-gray-500 hover:text-green-400" />
-                            </button>
-                            <button 
-                              onClick={() => handleFeedback(message.id, false)}
-                              className="p-1.5 hover:bg-gray-800 rounded-md transition-colors"
-                              title="Not helpful"
-                            >
-                              <ThumbsDown className="w-3.5 h-3.5 text-gray-500 hover:text-red-400" />
-                            </button>
-                          </>
-                        ) : (
-                          <span className="text-[10px] text-gray-500 px-2">
-                            {message.feedback === 'positive' ? '✓ Marked as helpful' : '✗ Marked as not helpful'}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  {/* Feedback for Bot */}
+                  {msg.isBot && index === messages.length - 1 && (
+                     <div className="mt-1 flex gap-2 opacity-50 hover:opacity-100 transition-opacity">
+                        <button onClick={() => handleFeedback(msg.id, true)} className="hover:text-green-400 p-1">
+                          <ThumbsUp className="w-3 h-3 text-gray-500" />
+                        </button>
+                        <button onClick={() => handleFeedback(msg.id, false)} className="hover:text-red-400 p-1">
+                          <ThumbsDown className="w-3 h-3 text-gray-500" />
+                        </button>
+                     </div>
+                  )}
                 </div>
               ))}
               
-              {/* Loading State */}
               {isLoading && (
-                <div className="flex gap-3">
-                  <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
-                    <Sparkles className="w-4 h-4 text-white animate-pulse" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-left">
-                      <span className="text-[11px] font-mono text-gray-500 px-1">Copilot • Thinking...</span>
-                    </div>
-                    <div className="mt-1 px-3 py-2.5 bg-[#2d2d2d] rounded-lg border border-gray-800">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
-                        <div className="w-2 h-2 bg-cyan-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
-                      </div>
-                    </div>
-                  </div>
+                <div className="flex items-start gap-2 mb-4">
+                   <div className="bg-[#1e1e1e] px-4 py-3 rounded-2xl rounded-tl-sm border border-white/5 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                      <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                      <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"></span>
+                   </div>
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Actions - Copilot Style */}
-            {messages.length <= 2 && (
-              <div className="px-4 pb-2 flex gap-2 overflow-x-auto border-t border-gray-800 pt-2">
-                {quickActions.map((action) => (
-                  <button
-                    key={action.label}
-                    onClick={() => handleQuickAction(action.label)}
-                    className="flex-shrink-0 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs font-medium text-gray-300 hover:text-white transition-all border border-gray-700 hover:border-gray-600 flex items-center gap-1.5"
-                  >
-                    <span>{action.icon}</span>
-                    <span className="font-mono">{action.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Input - Copilot Style */}
-            <div className="p-3 border-t border-gray-800 bg-[#2d2d2d]">
-              <div className="flex items-end gap-2">
-                <div className="flex-1 relative">
-                  <textarea
-                    placeholder="Ask Copilot anything..."
+            {/* Input Island */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] z-20">
+               <div className="bg-[#1e1e1e]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] p-1.5 shadow-2xl flex items-center gap-2 pr-2">
+                  <input
+                    type="text"
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    rows={1}
-                    className="w-full px-3 py-2.5 bg-[#1e1e1e] border border-gray-700 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-all resize-none pr-10 font-mono"
-                    style={{ minHeight: '40px', maxHeight: '120px' }}
+                    placeholder="Ask Armosa..."
+                    className="flex-1 bg-transparent border-none text-white text-sm px-4 focus:ring-0 placeholder:text-gray-500 h-10"
                   />
-                  <button
-                    onClick={toggleVoice}
-                    className={`absolute right-2 bottom-2 p-1.5 rounded-md transition-all ${
-                      isListening 
-                        ? 'bg-red-500/20 text-red-400' 
-                        : 'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
-                    }`}
-                    title={isListening ? 'Stop voice input' : 'Voice input'}
-                  >
-                    {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                  </button>
-                </div>
-                <button 
-                  onClick={handleSendMessage} 
-                  disabled={!inputMessage.trim() || isLoading}
-                  className="p-2.5 rounded-lg flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:from-gray-700 disabled:to-gray-700"
-                  title="Send message (Enter)"
-                >
-                  <Send className="w-4 h-4 text-white" />
-                </button>
-              </div>
-              <div className="mt-2 flex items-center justify-between text-[10px] font-mono text-gray-600">
-                <span>Press Enter to send, Shift+Enter for new line</span>
-                <span className="text-purple-500">Powered by AI</span>
-              </div>
+                  
+                  <div className="flex items-center gap-1">
+                    <button 
+                      onClick={toggleVoice}
+                      className={cn(
+                        "p-2 rounded-full transition-all",
+                        isListening ? "bg-red-500/20 text-red-400 animate-pulse" : "hover:bg-white/10 text-gray-400"
+                      )}
+                    >
+                      {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                    </button>
+                    
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={!inputMessage.trim() && !isLoading}
+                      className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </div>
+               </div>
             </div>
+            
           </div>
         </div>
+      </div>
       )}
     </>
   );
