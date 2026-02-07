@@ -5,43 +5,92 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, ArrowRight, ExternalLink, Briefcase, Zap, Bot, BrainCircuit, Search, FileText, Linkedin, BarChart, ShoppingCart, Code, Cloud, MessageSquare, PhoneCall, GraduationCap, Presentation, BookOpen, UserCheck, Coins, DollarSign, TrendingUp, Settings, Handshake, ClipboardCheck, MessageCircle, LifeBuoy } from 'lucide-react';
+import { ChevronDown, ChevronUp, ArrowRight, ExternalLink, Briefcase, Zap, Bot, BrainCircuit, Search, FileText, Linkedin, BarChart, ShoppingCart, Code, Cloud, MessageSquare, PhoneCall, GraduationCap, Presentation, BookOpen, UserCheck, Coins, DollarSign, TrendingUp, Settings, Handshake, ClipboardCheck, MessageCircle, LifeBuoy, Database, Cpu, Gamepad, Layers, Globe } from 'lucide-react';
 
 const pillarDetails = {
-  "AI Powered Job Search & Professional Development": {
+  "Career & Personal Brand": {
     icon: Briefcase,
     color: "#5271ff",
-    tagline: "Transform your career trajectory",
-    description: "AI-enhanced career tools and professional development",
-    emotionalHook: "Get Hired Faster with AI"
+    tagline: "Build strong, credible professional identities",
+    description: "We help individuals build strong, credible professional identities that translate skills and experience into real opportunities. We design resumes, LinkedIn profiles, portfolios, and personal websites that align with modern hiring systems.",
+    emotionalHook: "Get Hired Faster & Earn More"
   },
-  "AI Powered Business Development": {
+  "Digital Product & Growth": {
     icon: TrendingUp,
     color: "#ffb400",
-    tagline: "Accelerate business growth",
-    description: "Strategic AI solutions for market expansion",
-    emotionalHook: "Win More Clients, Close More Deals"
+    tagline: "Turn ideas into measurable results",
+    description: "We design, build, and optimize digital products and growth systems. This includes websites, platforms, analytics, marketing automation, and conversion systems built with real users and data in mind.",
+    emotionalHook: "Turn Ideas into Revenue"
   },
-  "AI Agents & Automations": {
-    icon: Bot,
+  "Sales & Business-Development Enablement": {
+    icon: Handshake,
     color: "#00bf63",
-    tagline: "Streamline operations with AI",
-    description: "Custom intelligent automation solutions",
-    emotionalHook: "Let AI Work for You 24/7"
+    tagline: "Predictable revenue generation",
+    description: "We implement structured sales and business-development systems that replace guesswork with repeatable processes. Focuses on building pipelines, CRMs, automation, and qualification workflows.",
+    emotionalHook: "Predictable Sales Growth"
   },
-  "AI Consulting": {
+  "Strategy, Optimization & Launch": {
+    icon: Presentation,
+    color: "#e74c3c",
+    tagline: "From thinking to doing",
+    description: "We help turn ideas into executable plans. We work with individuals, founders, and leadership teams to define direction, remove inefficiencies, and support launches with real validation loops.",
+    emotionalHook: "Execute With Confidence"
+  },
+  "AI Agents": {
+    icon: Bot,
+    color: "#6c5ce7",
+    tagline: "Automate real workflows",
+    description: "We design and deploy AI agents that perform real tasks. These agents automate defined responsibilities such as research, support, lead qualification, document handling, and operational tasks.",
+    emotionalHook: "Automate Real Work"
+  },
+  "AI Engineering & Machine Learning": {
     icon: BrainCircuit,
-    color: "#6A11CB",
-    tagline: "Strategic AI guidance",
-    description: "Expert consulting for AI transformation",
-    emotionalHook: "Transform Your Business with Intelligence"
+    color: "#2d3436",
+    tagline: "Production-ready intelligence",
+    description: "We build production-ready machine learning systems, from fine-tuning existing models to training custom models from scratch. Focuses on engineering reliability, integration, and maintainability.",
+    emotionalHook: "Dependable AI Systems"
   },
-  "AI Optimized Chatbots & Support Systems": {
-    icon: MessageCircle,
-    color: "#5271ff",
-    tagline: "Enhance customer experience 24/7",
-    description: "Intelligent support and engagement systems",
-    emotionalHook: "Delight Customers Automatically"
+  "Data Engineering & Insights": {
+    icon: Database,
+    color: "#0984e3",
+    tagline: "Trusted insights from raw data",
+    description: "We design and implement reliable data pipelines that transform raw information into trusted insights. Includes ingestion, transformation, validation, storage, dashboards, and governance.",
+    emotionalHook: "Decisions Backed by Data"
+  },
+  "Software Development & IT Consulting": {
+    icon: Code,
+    color: "#636e72",
+    tagline: "Scalable systems built to last",
+    description: "We design, build, and modernize software systems and IT foundations. Focuses on long-term value: clean architecture, documentation, and systems that teams can operate and extend.",
+    emotionalHook: "Software That Scales"
+  },
+  "IoT & Electronics Software": {
+    icon: Cpu,
+    color: "#d35400",
+    tagline: "Bridge hardware and cloud",
+    description: "We build electronics-level software and connected device systems. Includes Arduino/Pi development, embedded firmware, sensor integration, edge computing, and secure device-to-cloud communication.",
+    emotionalHook: "Connect the Physical World"
+  },
+  "Cloud & DevOps / MLOps": {
+    icon: Cloud,
+    color: "#00cec9",
+    tagline: "Secure, reliable infrastructure",
+    description: "We design and operate cloud infrastructure, DevOps pipelines, and MLOps systems. Focuses on automation, security, observability, and cost control to keep systems running reliably in production.",
+    emotionalHook: "Infrastructure You Can Trust"
+  },
+  "Management Consulting": {
+    icon: ClipboardCheck,
+    color: "#27ae60",
+    tagline: "Execution-focused leadership",
+    description: "We provide execution-focused consulting that connects strategy to action. We improve decision-making, alignment, and operational effectiveness through process design and change execution.",
+    emotionalHook: "Lead With Clarity"
+  },
+  "AR/VR & Game Development": {
+    icon: Gamepad,
+    color: "#e84393",
+    tagline: "Immersive experiences that work",
+    description: "We design and build immersive AR, VR, and game-based systems for training, simulation, and visualization. Focuses on functional deployment and scalable technology.",
+    emotionalHook: "Immersive Realities"
   }
 };
 

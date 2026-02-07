@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Service } from '@/entities/Service';
-import { ChevronDown, ChevronUp, X, ExternalLink, Briefcase, Coins, DollarSign, TrendingUp, Bot, Settings, Handshake, ClipboardCheck, MessageCircle, LifeBuoy, ArrowRight } from 'lucide-react';
+import { ChevronDown, ChevronUp, X, ExternalLink, Briefcase, Coins, DollarSign, TrendingUp, Bot, Settings, Handshake, ClipboardCheck, MessageCircle, LifeBuoy, ArrowRight, Presentation, BrainCircuit, BarChart, Code, Cpu, Cloud, Gamepad, Database } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -9,40 +9,89 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
 const pillarDetails = {
-  "AI Powered Job Search & Professional Development": {
+  "Career & Personal Brand": {
     color: "#5271ff",
-    tagline: "Transform your career trajectory",
-    description: "AI-enhanced career tools and professional development",
+    tagline: "Build strong professional identities",
+    description: "We help individuals build strong, credible professional identities that translate skills into opportunities. Includes resumes, LinkedIn profiles, and personal websites.",
     icons: [Briefcase],
-    emotionalHook: "Get Hired Faster with AI"
+    emotionalHook: "Get Hired Faster & Earn More"
   },
-  "AI Powered Business Development": {
+  "Digital Product & Growth": {
     color: "#ffb400",
-    tagline: "Accelerate business growth",
-    description: "Strategic AI solutions for market expansion",
-    icons: [Coins, DollarSign, TrendingUp],
-    emotionalHook: "Win More Clients, Close More Deals"
+    tagline: "Turn ideas into measurable results",
+    description: "We design, build, and optimize digital products and growth systems. Websites, platforms, and conversion systems built with data in mind.",
+    icons: [TrendingUp],
+    emotionalHook: "Turn Ideas into Revenue"
   },
-  "AI Agents & Automations": {
+  "Sales & Business-Development Enablement": {
     color: "#00bf63",
-    tagline: "Streamline operations with AI",
-    description: "Custom intelligent automation solutions",
+    tagline: "Predictable revenue generation",
+    description: "Structured sales systems that replace guesswork with repeatable processes. CRM, automation, and pipeline qualification.",
+    icons: [Handshake, Coins],
+    emotionalHook: "Predictable Sales Growth"
+  },
+  "Strategy, Optimization & Launch": {
+    color: "#e74c3c",
+    tagline: "From thinking to doing",
+    description: "We help turn ideas into executable plans. We define direction, remove inefficiencies, and support launches with validation loops.",
+    icons: [Presentation],
+    emotionalHook: "Execute With Confidence"
+  },
+  "AI Agents": {
+    color: "#6c5ce7",
+    tagline: "Automate real workflows",
+    description: "We design and deploy AI agents that perform real task like research, lead qualification, and document handling.",
     icons: [Bot, Settings],
-    emotionalHook: "Let AI Work for You 24/7"
+    emotionalHook: "Automate Real Work"
   },
-  "AI Consulting": {
-    color: "#6A11CB",
-    tagline: "Strategic AI guidance",
-    description: "Expert consulting for AI transformation",
-    icons: [Handshake, ClipboardCheck],
-    emotionalHook: "Transform Your Business with Intelligence"
+  "AI Engineering & Machine Learning": {
+    color: "#2d3436",
+    tagline: "Production-ready intelligence",
+    description: "We build production-ready ML systems, from fine-tuning to custom models. Focused on reliability and integration.",
+    icons: [BrainCircuit],
+    emotionalHook: "Dependable AI Systems"
   },
-  "AI Optimized Chatbots & Support Systems": {
-    color: "#5271ff",
-    tagline: "Enhance customer experience 24/7",
-    description: "Intelligent support and engagement systems",
-    icons: [MessageCircle, LifeBuoy],
-    emotionalHook: "Delight Customers Automatically"
+  "Data Engineering & Insights": {
+    color: "#0984e3",
+    tagline: "Trusted insights from raw data",
+    description: "Reliable data pipelines that transform raw information into insights. Ingestion, storage, dashboards, and governance.",
+    icons: [BarChart, Database],
+    emotionalHook: "Decisions Backed by Data"
+  },
+  "Software Development & IT Consulting": {
+    color: "#636e72",
+    tagline: "Scalable systems built to last",
+    description: "Modern software systems and IT foundations. Clean architecture, documentation, and systems teams can operate.",
+    icons: [Code],
+    emotionalHook: "Software That Scales"
+  },
+  "IoT & Electronics Software": {
+    color: "#d35400",
+    tagline: "Bridge hardware and cloud",
+    description: "Electronics-level software and connected devices. Arduino/Pi, firmware, sensor integration, and secure device-to-cloud.",
+    icons: [Cpu, Settings],
+    emotionalHook: "Connect the Physical World"
+  },
+  "Cloud & DevOps / MLOps": {
+    color: "#00cec9",
+    tagline: "Secure, reliable infrastructure",
+    description: "Cloud infrastructure, DevOps pipelines, and MLOps systems. Automation, security, and cost control for production.",
+    icons: [Cloud],
+    emotionalHook: "Infrastructure You Can Trust"
+  },
+  "Management Consulting": {
+    color: "#27ae60",
+    tagline: "Execution-focused leadership",
+    description: "Execution-focused consulting connecting strategy to action. Improvements in decision-making and operational effectiveness.",
+    icons: [ClipboardCheck],
+    emotionalHook: "Lead With Clarity"
+  },
+  "AR/VR & Game Development": {
+    color: "#e84393",
+    tagline: "Immersive experiences that work",
+    description: "Immersive AR, VR, and game-based systems for training and simulation. Functional deployment and scalable technology.",
+    icons: [Gamepad],
+    emotionalHook: "Immersive Realities"
   }
 };
 

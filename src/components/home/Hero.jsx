@@ -51,53 +51,32 @@ export default function Hero() {
 
   // Actual MasterProDev services data
   const realServices = [
-    // AI Powered Job Search & Professional Development
-    { title: 'AI-Enhanced LinkedIn', description: 'Profile optimization', icon: '💼', color: '#0077b5' },
-    { title: 'AI-Optimized Resume', description: 'ATS-friendly formats', icon: '📄', color: '#4ecdc4' },
-    { title: 'Career Transition', description: 'Strategic career moves', icon: '🔄', color: '#96ceb4' },
-    { title: 'Professional Portfolio', description: 'Showcase your work', icon: '👤', color: '#45b7d1' },
-    { title: 'Job Market Analysis', description: 'Market insights', icon: '🌐', color: '#6c5ce7' },
-    { title: 'LinkedIn Strategy', description: 'Network building', icon: '🤝', color: '#0077b5' },
-    { title: 'Interview Preparation', description: 'AI-powered practice', icon: '🎯', color: '#e17055' },
-    { title: 'Staffing Solutions', description: 'Talent acquisition', icon: '👥', color: '#fd79a8' },
+    { title: 'Career Branding', description: 'Resumes & Portfolios', icon: '💼', color: '#5271ff' },
+    { title: 'Digital Growth', description: 'Product Optimization', icon: '📈', color: '#ffb400' },
+    { title: 'Sales Enablement', description: 'Pipeline Automation', icon: '🤝', color: '#00bf63' },
+    { title: 'Strategy Launch', description: 'Idea to Execution', icon: '📢', color: '#e74c3c' },
+    { title: 'AI Agents', description: 'Workflow Automation', icon: '🤖', color: '#6c5ce7' },
+    { title: 'ML Engineering', description: 'Production AI Systems', icon: '🧠', color: '#2d3436' },
+    { title: 'Data Insights', description: 'Pipelines & Analytics', icon: '📊', color: '#0984e3' },
+    { title: 'Software Dev', description: 'Scalable Architecture', icon: '💻', color: '#636e72' },
+    { title: 'IoT Solutions', description: 'Connected Devices', icon: '🔌', color: '#d35400' },
+    { title: 'Cloud & DevOps', description: 'Secure Infrastructure', icon: '☁️', color: '#00cec9' },
+    { title: 'Management', description: 'Operational Excellence', icon: '📋', color: '#27ae60' },
+    { title: 'AR/VR & Games', description: 'Immersive Tech', icon: '🎮', color: '#e84393' },
     
-    // AI Powered Business Development
-    { title: 'Intelligent Shopify', description: 'E-commerce optimization', icon: '🛒', color: '#00bf63' },
-    { title: 'AI-Assisted Sales', description: 'Sales automation', icon: '💰', color: '#fdcb6e' },
-    { title: 'Customer Journey', description: 'Experience mapping', icon: '🗺️', color: '#a29bfe' },
-    { title: 'Shopify Dashboard', description: 'Analytics & insights', icon: '📊', color: '#00cec9' },
-    { title: 'Market Research', description: 'Data-driven insights', icon: '🔍', color: '#6c5ce7' },
-    { title: 'Predictive Analytics', description: 'Future forecasting', icon: '🔮', color: '#e84393' },
-    { title: 'Business Process', description: 'Workflow optimization', icon: '⚙️', color: '#f39c12' },
-    
-    // AI Agents & Automations
-    { title: 'Custom AI Agents', description: 'Intelligent assistants', icon: '🤖', color: '#5271ff' },
-    { title: 'n8n Workflows', description: 'Automation platform', icon: '🔗', color: '#ff6b6b' },
-    { title: 'Data Processing', description: 'Automated analysis', icon: '📈', color: '#4ecdc4' },
-    { title: 'API Integration', description: 'System connections', icon: '🔌', color: '#96ceb4' },
-    { title: 'Email Automation', description: 'Smart messaging', icon: '📧', color: '#45b7d1' },
-    { title: 'Social Media AI', description: 'Content automation', icon: '📱', color: '#fd79a8' },
-    
-    // AI Consulting
-    { title: 'AI Strategy', description: 'Implementation roadmap', icon: '🗺️', color: '#f39c12' },
-    { title: 'AI Ethics', description: 'Responsible AI practices', icon: '⚖️', color: '#e74c3c' },
-    { title: 'Technology Assessment', description: 'AI readiness evaluation', icon: '🔍', color: '#9b59b6' },
-    { title: 'Custom LLM', description: 'Tailored language models', icon: '🧠', color: '#5271ff' },
-    { title: 'Team Training', description: 'AI skill development', icon: '🎓', color: '#00bf63' },
-    { title: 'Fine-Tuned Models', description: 'Specialized AI systems', icon: '🔧', color: '#ffb400' },
-    
-    // AI Optimized Chatbots & Support Systems
-    { title: 'Smart Customer Support', description: '24/7 AI assistance', icon: '💬', color: '#00cec9' },
-    { title: 'Customer Service AI', description: 'Automated support', icon: '🛟', color: '#00b894' },
-    { title: 'Knowledge Base AI', description: 'Smart documentation', icon: '📚', color: '#0984e3' },
-    { title: 'Sentiment Analysis', description: 'Emotion detection', icon: '😊', color: '#e84393' },
-    { title: 'Voice-Enabled AI', description: 'Speech interactions', icon: '🎤', color: '#6c5ce7' },
-    { title: 'Multi-Channel Support', description: 'Unified communications', icon: '📞', color: '#fd79a8' },
-    { title: 'RAG Chatbots', description: 'Knowledge-enhanced AI', icon: '🔍', color: '#a29bfe' },
-    
-    // Additional Products/Services to reach 35
-    { title: 'AI Content Creation', description: 'Automated writing', icon: '✍️', color: '#e17055' },
-    { title: 'Digital Marketing AI', description: 'Campaign optimization', icon: '📢', color: '#fdcb6e' }
+    // Variations to fill the grid nicely
+    { title: 'Personal Brand', description: 'LinkedIn Optimization', icon: '👤', color: '#5271ff' },
+    { title: 'Product Design', description: 'UX & Analytics', icon: '🎨', color: '#ffb400' },
+    { title: 'CRM Systems', description: 'Sales Process', icon: '💼', color: '#00bf63' },
+    { title: 'Business Strategy', description: 'Roadmaps & KPIs', icon: '🗺️', color: '#e74c3c' },
+    { title: 'Custom Chatbots', description: 'Support Automation', icon: '💬', color: '#6c5ce7' },
+    { title: 'AI Models', description: 'Training & Tuning', icon: '⚙️', color: '#2d3436' },
+    { title: 'Big Data', description: 'Warehousing', icon: '🗄️', color: '#0984e3' },
+    { title: 'App Development', description: 'Web & Mobile', icon: '📱', color: '#636e72' },
+    { title: 'Embedded Systems', description: 'Real-time Control', icon: '📟', color: '#d35400' },
+    { title: 'MLOps', description: 'AI Lifecycle', icon: '🔄', color: '#00cec9' },
+    { title: 'Process Design', description: 'Efficiency', icon: '⚡', color: '#27ae60' },
+    { title: 'Game Design', description: 'Interactive 3D', icon: '🎲', color: '#e84393' },
   ];
 
   // Generate 35 feature pills for a 5x7 grid structure
