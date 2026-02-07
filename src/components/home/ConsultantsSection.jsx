@@ -41,15 +41,22 @@ export default function ConsultantsSection() {
                 👥
               </div>
               <h2 className="text-lg md:text-xl font-bold text-black">
-                Our AI Experts
+                Our System Experts
               </h2>
             </div>
           </div>
 
           <section id="consultants" className="mt-6">
             <div className="text-center mb-8">
-              <p className="mt-4 text-lg text-white">Meet the specialists driving your AI transformation.</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+               Meet the Builders & Strategists
+              </h2>
+              <p className="text-lg text-white max-w-2xl mx-auto">
+                Connect with the professionals who will design, build, and hand over your next system.
+              </p>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {consultants.map(consultant => (

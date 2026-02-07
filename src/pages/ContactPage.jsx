@@ -94,10 +94,10 @@ ${formData.message}
           <section className="mt-8 relative z-5">
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                <span style={{ color: '#00bf63' }}>Let's Connect</span>
+                <span style={{ color: '#00bf63' }}>Let's Build It</span>
               </h1>
               <p className="text-xl text-gray-700 max-w-2xl mx-auto">
-                Ready to transform your professional journey with AI? Our team is here to help you achieve your goals.
+                Ready to transform your ideas into working systems? Our team is here to help you achieve your goals.
               </p>
             </div>
             

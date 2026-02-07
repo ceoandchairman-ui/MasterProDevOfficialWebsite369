@@ -53,7 +53,7 @@ export default function ReviewsSection() {
 
           <section id="reviews" className="mt-6">
             <div className="text-center mb-8">
-              <p className="mt-4 text-lg text-gray-700">See what our clients say about their AI transformation.</p>
+              <p className="mt-4 text-lg text-gray-700">See what our clients say about their digital and career transformation.</p>
             </div>
             
             <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-8">

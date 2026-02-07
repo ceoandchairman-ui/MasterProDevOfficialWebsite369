@@ -204,9 +204,9 @@ export default function ServicesPage() {
           <section className="mt-6">
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-                Comprehensive AI Solutions
+                End-to-End System Implementation
               </h1>
-              <p className="text-xl text-gray-600">Explore our innovative solutions organized by our core AI pillars.</p>
+              <p className="text-xl text-gray-600">Explore our services organized by our core 12 disciplines.</p>
             </div>
 
             <div className="mt-16 space-y-6">

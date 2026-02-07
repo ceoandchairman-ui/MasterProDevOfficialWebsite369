@@ -77,9 +77,9 @@ export default function HireConsultant() {
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="text-[#FBBC05]">Hire</span>{' '}
             <span className="text-[#4285F4]">a</span>{' '}
-            <span className="text-[#34A853]">Consultant</span>
+            <span className="text-[#34A853]">System Builder</span>
           </h1>
-          <p className="text-xl text-gray-600">Find the perfect AI expert for your project</p>
+          <p className="text-xl text-gray-600">Find the perfect expert to document, build, and scale your project.</p>
         </div>
 
         {/* Search Bar */}
@@ -88,7 +88,7 @@ export default function HireConsultant() {
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
-                placeholder="Search by name, service, or location..."
+                placeholder="Search by skill (e.g. React, Python, Strategy)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 h-12 text-lg"

@@ -65,9 +65,9 @@ export default function ContactSection() {
           <section id="contact" className="mt-8 relative z-5">
             <div className="text-center mb-12">
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                <span style={{ color: '#00bf63' }}>Transform Your Journey</span>
+                <span style={{ color: '#00bf63' }}>Start Building Today</span>
               </h1>
-              <p className="text-lg text-gray-600">Ready to leverage AI for your career or business? Let's connect!</p>
+              <p className="text-lg text-gray-600">Ready to build your next system or pivot your career? Let's connect!</p>
             </div>
             
             <div className="mt-12 grid md:grid-cols-2 gap-12">
@@ -145,7 +145,7 @@ export default function ContactSection() {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Message *</label>
                     <Textarea 
                       name="message"
-                      placeholder="Tell us about your AI transformation goals..." 
+                      placeholder="Tell us about your project or career goals..." 
                       value={formData.message}
                       onChange={handleInputChange}
                       className="h-32 border-2 border-gray-200 focus:border-green-500 focus:ring-green-500"

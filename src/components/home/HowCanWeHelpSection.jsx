@@ -240,8 +240,8 @@ export default function HowCanWeHelpSection() {
                 {/* Tab Content */}
                 <TabsContent value="query">
                   <div className="p-4 bg-[#ffb400] border-2 border-black rounded-lg space-y-4">
-                    <Textarea placeholder="Type your idea, question, or challenge here..." value={textQuery} onChange={(e) => setTextQuery(e.target.value)} className="min-h-[100px]" />
-                    <Button type="button" onClick={handleAddTextQuery} disabled={!textQuery.trim()} className="bg-[#5271ff] text-white hover:bg-[#00bf63] hover:text-white">Add Text to Submission</Button>
+                    <Textarea placeholder="Describe your project, business challenge, or career goal. Mention specific technologies (AI, React, Python) if you know them..." value={textQuery} onChange={(e) => setTextQuery(e.target.value)} className="min-h-[100px]" />
+                    <Button type="button" onClick={handleAddTextQuery} disabled={!textQuery.trim()} className="bg-[#5271ff] text-white hover:bg-[#00bf63] hover:text-white">Add Details to Submission</Button>
                   </div>
                 </TabsContent>
 

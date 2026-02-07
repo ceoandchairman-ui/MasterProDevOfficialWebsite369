@@ -114,13 +114,13 @@ export default function AboutSection() {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div className="order-2 md:order-1">
                 <p className="mt-4 text-base text-white leading-relaxed">
-                  At <span style={{ color: '#ffde59' }}>Master</span><span style={{ color: '#ffffff' }}>Pro</span><span style={{ color: '#00bf63' }}>Dev</span>, our mission is to <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>future-proof your career and business<Sparkles className="sparkle-icon w-3 h-3" style={{ color: '#ffde59' }} /></span> by turning the disruptive wave of <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>AI<Sparkles className="sparkle-icon w-3 h-3" style={{ color: '#ffde59' }} /></span> into your biggest advantage.
+                  At <span style={{ color: '#ffde59' }}>Master</span><span style={{ color: '#ffffff' }}>Pro</span><span style={{ color: '#00bf63' }}>Dev</span>, we follow one simple principle: <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>we implement, document, and hand over systems that work<Sparkles className="sparkle-icon w-3 h-3" style={{ color: '#ffde59' }} /></span>.
                 </p>
                 <p className="mt-3 text-base text-white leading-relaxed">
-                  We help professionals and organizations <span className="keyword-highlight font-bold" style={{ color: '#00bf63' }}>stand out, scale up, and succeed<Sparkles className="sparkle-icon w-3 h-3" style={{ color: '#00bf63' }} /></span> using intelligent, customized AI-powered strategies — from standout resumes and automated workflows to business acceleration and AI agents.
+                  We are not just consultants; we are builders. Whether you are an individual needing a <span className="keyword-highlight font-bold" style={{ color: '#00bf63' }}>standout career brand</span>, a founder launching a <span className="keyword-highlight font-bold" style={{ color: '#00bf63' }}>digital product</span>, or an enterprise scaling <span className="keyword-highlight font-bold" style={{ color: '#00bf63' }}>software & infrastructure</span>, we bridge the gap between thinking and doing.
                 </p>
                 <p className="mt-3 text-base text-white leading-relaxed">
-                  In a world flooded with AI hype, <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>we provide clarity, execution, and real ROI<Sparkles className="sparkle-icon w-3 h-3" style={{ color: '#ffde59' }} /></span>. Whether you're seeking your next opportunity or scaling your business, MasterProDev is your AI-powered partner in unlocking exponential growth.
+                  Our services cover the full spectrum of modern execution: from <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>Software Development</span> and <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>AI Engineering</span> to <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>Strategic Consulting</span>. We deliver assets you own, systems you can control, and results you can measure.
                 </p>
               </div>
               <div className="order-1 md:order-2">

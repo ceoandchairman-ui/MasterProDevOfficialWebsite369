@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { Rocket, Building, Award, DollarSign, Lightbulb, Handshake, Target, UserCheck, TrendingUp, CheckCircle, Coins, Sparkles, Clock, Zap, Users } from 'lucide-react';
+import { Rocket, Building, Award, DollarSign, Lightbulb, Handshake, Target, UserCheck, TrendingUp, CheckCircle, Coins, Sparkles, Clock, Zap, Users, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
@@ -419,27 +419,27 @@ export default function AboutPage() {
           <section className="mt-6">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="order-2 md:order-1">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  Future-Proof Your Career and Business
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+                  We <span style={{ color: '#ffde59' }}>Implement</span>, <span style={{ color: '#5271ff' }}>Document</span> & <span style={{ color: '#00bf63' }}>Hand Over</span>.
                 </h1>
-                <p className="text-lg text-white/90 italic mb-6">
-                  Turn the disruptive wave of AI into your biggest advantage.
+                <p className="text-lg text-gray-700 italic mb-6 border-l-4 border-[#ffde59] pl-4">
+                  "Execution is the only strategy that matters."
                 </p>
-                <p className="mt-4 text-lg text-white leading-relaxed">
-                  At <span style={{ color: '#ffde59' }}>Master</span><span style={{ color: '#ffffff' }}>Pro</span><span style={{ color: '#00bf63' }}>Dev</span>, our mission is to <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>future-proof your career and business<Sparkles className="sparkle-icon w-3 h-3" style={{ color: '#ffde59' }} /></span> by turning the disruptive wave of AI into your biggest advantage.
+                <p className="mt-4 text-lg text-gray-700 leading-relaxed">
+                  At <span className="font-bold">MasterProDev</span>, we don't just give advice. We build systems. From <span className="font-semibold text-blue-600">AI Agents</span> to <span className="font-semibold text-green-600">Enterprise Software</span> and <span className="font-semibold text-amber-600">Strategic Career Brands</span>, we bridge the gap between thinking and doing.
                 </p>
-                <p className="mt-4 text-lg text-white leading-relaxed">
-                  We help professionals and organizations <span className="keyword-highlight font-bold" style={{ color: '#00bf63' }}>stand out, scale up, and succeed<Sparkles className="sparkle-icon w-3 h-3" style={{ color: '#00bf63' }} /></span> using intelligent, customized <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>AI-powered strategies<Sparkles className="sparkle-icon w-3 h-3" style={{ color: '#ffde59' }} /></span> — from standout resumes and automated workflows to business acceleration and AI agents.
+                <p className="mt-4 text-lg text-gray-700 leading-relaxed">
+                  Too many consultants leave you with a slide deck. <span className="font-bold border-b-2 border-[#00bf63]">We leave you with a working system.</span> Whether you are a founder, a job-seeker, or an enterprise leader, our mission is to provide clarity, reliability, and long-term value.
                 </p>
-                <p className="mt-4 text-lg text-white leading-relaxed">
-                  In a world flooded with AI hype, <span className="keyword-highlight font-bold" style={{ color: '#ffde59' }}>we provide clarity, execution, and real ROI<Sparkles className="sparkle-icon w-3 h-3" style={{ color: '#ffde59' }} /></span>. Whether you're seeking your next opportunity or scaling your business, MasterProDev is your AI-powered partner in unlocking exponential growth.
+                <p className="mt-4 text-lg text-gray-700 leading-relaxed">
+                  We document every step, ensure you own your data, and train you to manage what we build. No black boxes. Just results.
                 </p>
               </div>
               <div className="order-1 md:order-2">
-                <div className="image-container overflow-hidden relative" style={{ boxShadow: '0 15px 35px rgba(0,0,0,0.15)' }}>
+                <div className="image-container overflow-hidden relative rounded-2xl" style={{ boxShadow: '0 15px 35px rgba(0,0,0,0.15)' }}>
                   <img 
-                    src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2832&auto=format&fit=crop" 
-                    alt="About Us - AI Consulting Team" 
+                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2850&q=80" 
+                    alt="Team working on systems" 
                     className="w-full h-64 md:h-96 object-cover"
                   />
                 </div>

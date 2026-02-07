@@ -224,11 +224,11 @@ export default function TellYourIdeaPage() {
           <section className="mt-12">
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                <span className="text-[#FBBC05]">Share</span>{' '}
-                <span className="text-[#4285F4]">Your</span>{' '}
-                <span className="text-[#34A853]">Vision</span>
+                <span className="text-[#FBBC05]">Start</span>{' '}
+                <span className="text-[#4285F4]">Building</span>{' '}
+                <span className="text-[#34A853]">Today</span>
               </h1>
-              <p className="text-xl text-gray-600">We're excited to hear about your project or challenge. Let's make it happen together!</p>
+              <p className="text-xl text-gray-600">Tell us what you want to build. We'll help you design, document, and execute it.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">

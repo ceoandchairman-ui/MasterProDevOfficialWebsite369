@@ -159,11 +159,11 @@ export default function Hero() {
       curveX: 200, curveY: 450,
       cardX: 140, cardY: 390,
       position: 'above',
-      icon: AlertCircle,
+      icon: Search,
       color: '#e74c3c',
-      title: 'Current Challenges',
-      bubbleTitle: 'Current Challenges',
-      bubbleDescription: '• Outdated processes<br/>• Low market visibility',
+      title: 'Discovery',
+      bubbleTitle: 'Discovery',
+      bubbleDescription: '• Needs Assessment<br/>• Gap Analysis',
       bubblePosition: 'right'
     },
     {
@@ -173,9 +173,9 @@ export default function Hero() {
       position: 'above',
       icon: Target,
       color: '#f39c12',
-      title: 'AI Assessment',
-      bubbleTitle: 'AI Assessment',
-      bubbleDescription: '• Business analysis<br/>• Goal identification',
+      title: 'Strategy',
+      bubbleTitle: 'Strategy',
+      bubbleDescription: '• Roadmap Design<br/>• Solution Architecture',
       bubblePosition: 'right'
     },
     {
@@ -183,11 +183,11 @@ export default function Hero() {
       curveX: 600, curveY: 320,
       cardX: 540, cardY: 260,
       position: 'above',
-      icon: Bot,
+      icon: Briefcase,
       color: '#5271ff',
-      title: 'AI Solutions',
-      bubbleTitle: 'AI Solutions',
-      bubbleDescription: '• System automation<br/>• Custom AI solutions',
+      title: 'Execution',
+      bubbleTitle: 'Execution',
+      bubbleDescription: '• Implementation<br/>• System Build',
       bubblePosition: 'right'
     },
     {
@@ -197,9 +197,9 @@ export default function Hero() {
       position: 'above',
       icon: TrendingUp,
       color: '#00bf63',
-      title: 'Growth Acceleration',
-      bubbleTitle: 'Growth Acceleration',
-      bubbleDescription: '• Enhanced productivity<br/>• Increased efficiency',
+      title: 'Handover',
+      bubbleTitle: 'Handover',
+      bubbleDescription: '• Documentation<br/>• Training & Ownership',
       bubblePosition: 'left'
     },
     {
@@ -209,9 +209,9 @@ export default function Hero() {
       position: 'above',
       icon: Rocket,
       color: '#00bf63',
-      title: 'Peak Performance',
-      bubbleTitle: 'Peak Performance',
-      bubbleDescription: '• Market leadership<br/>• Sustainable growth',
+      title: 'Growth',
+      bubbleTitle: 'Growth',
+      bubbleDescription: '• Scaling<br/>• Optimization',
       bubblePosition: 'left'
     }
   ];
@@ -272,12 +272,12 @@ export default function Hero() {
             <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
               <div className="mb-6">
                 <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
-                  <span style={{ color: '#ffb400' }}>Master</span>
+                   <span style={{ color: '#ffb400' }}>Master</span>
                   <span style={{ color: '#5271ff' }}>Pro</span>
                   <span style={{ color: '#00bf63' }}>Dev</span>
                 </h1>
                 <p className="text-lg md:text-xl mb-3 text-gray-700">
-                  Elite AI Consultants 👨‍💼 Transforming Careers 🚀 & Businesses 🏢 Building Success Stories 🏆
+                  <span className="font-semibold text-blue-600">AI</span> & <span className="font-semibold text-green-600">Tech</span> Consulting 💻 We Implement Systems That Work 🚀
                 </p>
               </div>
 
@@ -286,7 +286,7 @@ export default function Hero() {
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search for services or consultants..."
+                      placeholder="Search services (e.g., 'Resume', 'IoT', 'DevOps')..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="crt-search-input w-full pl-5 pr-12 py-3 text-green-300 placeholder-green-700 bg-transparent border-0 rounded-full focus:ring-0"
@@ -300,7 +300,7 @@ export default function Hero() {
               
               <div className="mb-8" ref={chartRef}>
                 <h2 className="text-xl md:text-2xl font-bold text-center text-black mb-6">
-                  Enhance Your Professional Growth & Business Success with <span style={{ color: '#ffb400' }}>AI Consulting</span>
+                  From <span style={{ color: '#ffb400' }}>Idea</span> to <span style={{ color: '#00bf63' }}>Executed System</span>. We Document, Build & Hand Over.
                 </h2>
                 <div className="max-w-7xl mx-auto p-6 md:p-8 bg-gray-50 rounded-2xl relative shadow-inner overflow-hidden">
                   <svg

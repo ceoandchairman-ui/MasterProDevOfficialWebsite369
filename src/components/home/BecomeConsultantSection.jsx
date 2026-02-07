@@ -99,10 +99,10 @@ ${formData.why}
           <div className="mt-6">
             <div className="text-center mb-12">
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                Become a Consultant
+                Become a System Builder
               </h2>
               <p className="text-xl text-white/90 mb-6">
-                Are you an AI expert? Join our network of elite consultants and help transform careers and businesses.
+                Are you an experienced builder? Join our network of elite experts to document, build, and scale systems.
               </p>
               
               {/* Benefits */}
@@ -166,7 +166,7 @@ ${formData.why}
                     <Input 
                       id="title"
                       name="title"
-                      placeholder="AI Solutions Architect" 
+                      placeholder="Solutions Architect / Lead Developer" 
                       value={formData.title}
                       onChange={handleChange}
                       className="bg-white/90"
@@ -196,7 +196,7 @@ ${formData.why}
                   <Textarea 
                     id="expertise"
                     name="expertise"
-                    placeholder="AI Strategy, Machine Learning, Automation, Business Intelligence, etc." 
+                    placeholder="Software Development, Data Engineering, IoT, Strategy, Mobile Apps, etc." 
                     className="h-24 bg-white/90" 
                     value={formData.expertise}
                     onChange={handleChange}
