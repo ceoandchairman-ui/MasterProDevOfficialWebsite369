@@ -208,159 +208,77 @@ export default function ServicesSection() {
               />
             </div>
 
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pillars.map(pillar => {
                 const pillarData = pillarDetails[pillar];
-                const pillarServices = filteredServices.filter(s => s.category === pillar);
-                const isExpanded = expandedCategories[pillar];
                 const isHovered = hoveredPillar === pillar;
 
-                if (pillarServices.length === 0 && searchQuery) return null;
+                // Simple search filter based on pillar name or description
+                if (searchQuery && 
+                    !pillar.toLowerCase().includes(searchQuery.toLowerCase()) && 
+                    !pillarData.description.toLowerCase().includes(searchQuery.toLowerCase())) {
+                  return null;
+                }
 
                 return (
                   <div 
                     key={pillar}
-                    className="pillar-card bg-white rounded-xl shadow-md overflow-hidden border-2 transition-all duration-300"
+                    className="pillar-card bg-white rounded-xl shadow-md overflow-hidden border-2 transition-all duration-300 flex flex-col h-full cursor-pointer group"
                     style={{ 
                       borderColor: pillarData.color,
                       background: isHovered 
-                        ? `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, ${pillarData.color}30 100%)`
+                        ? `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, ${pillarData.color}15 100%)`
                         : '#ffffff',
                       boxShadow: isHovered 
-                        ? `0 12px 24px ${pillarData.color}30, 0 6px 12px rgba(0,0,0,0.1)`
-                        : '0 4px 6px rgba(0,0,0,0.1)'
+                        ? `0 12px 24px ${pillarData.color}20, 0 6px 12px rgba(0,0,0,0.1)`
+                        : '0 4px 6px rgba(0,0,0,0.1)',
+                      transform: isHovered ? 'translateY(-6px)' : 'none'
                     }}
                     onMouseEnter={() => setHoveredPillar(pillar)}
                     onMouseLeave={() => setHoveredPillar(null)}
+                    onClick={() => setSelectedService({
+                      name: pillar,
+                      description: pillarData.description,
+                      color: pillarData.color,
+                      icon: pillarData.icons[0]
+                    })}
                   >
-                    <button
-                      onClick={() => toggleCategory(pillar)}
-                      className="w-full px-4 py-3 flex items-center justify-between hover:bg-opacity-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="flex items-center gap-2">
-                          {pillarData.icons.map((Icon, idx) => (
-                            <Icon 
-                              key={idx}
-                              className="w-6 h-6 icon-hover transition-transform duration-300"
-                              style={{ 
-                                color: pillarData.color,
-                                transform: isHovered ? 'scale(1.15)' : 'scale(1)'
-                              }}
-                            />
-                          ))}
-                        </div>
-                        <div className="text-left flex-1">
-                          <h3 className="text-lg font-bold text-black">
-                            {pillar}
-                          </h3>
-                          {isHovered && (
-                            <p className="text-sm font-medium mt-1 transition-all duration-300" style={{ color: pillarData.color }}>
-                              {pillarData.emotionalHook}
-                            </p>
-                          )}
-                          <p className="text-sm text-gray-600">{pillarServices.length} Services</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {isHovered && (
-                          <Link to={createPageUrl('ServicesPage')}>
-                            <Button 
-                              size="sm" 
-                              className="text-white"
-                              style={{ backgroundColor: pillarData.color }}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              Explore Services
-                            </Button>
-                          </Link>
-                        )}
-                        {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                      </div>
-                    </button>
-
-                    {isExpanded && (
-                      <div className="px-4 pb-4">
+                    <div className="p-6 flex flex-col h-full">
+                      <div className="flex items-start justify-between mb-4">
                         <div 
-                          className="mb-4 p-4 rounded-lg"
-                          style={{ backgroundColor: `${pillarData.color}15` }}
+                          className="w-12 h-12 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                          style={{ 
+                            backgroundColor: `${pillarData.color}20`, 
+                            color: pillarData.color
+                          }}
                         >
-                          <h4 className="text-xl font-bold mb-1" style={{ color: pillarData.color }}>
-                            {pillarData.tagline}
-                          </h4>
-                          <p className="text-sm text-gray-700">{pillarData.description}</p>
+                          {(() => {
+                            const Icon = pillarData.icons[0] || Briefcase;
+                            return <Icon className="w-6 h-6" />;
+                          })()}
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {pillarServices.map(service => (
-                            <div
-                              key={service.id}
-                              onClick={() => setSelectedService(service)}
-                              onMouseEnter={() => setHoveredService(service.id)}
-                              onMouseLeave={() => setHoveredService(null)}
-                              className="service-card bg-white rounded-lg border-2 shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden"
-                              style={{ 
-                                borderColor: hoveredService === service.id ? pillarData.color : '#e5e7eb'
-                              }}
-                            >
-                              <div className="p-4">
-                                <div className="flex items-start gap-3">
-                                  <div 
-                                    className="service-icon-container w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                                    style={{ 
-                                      backgroundColor: `${pillarData.color}20`,
-                                      border: `2px solid ${pillarData.color}40`
-                                    }}
-                                  >
-                                    <span className="text-2xl">
-                                      {service.icon === 'FileText' && '📄'}
-                                      {service.icon === 'Linkedin' && '💼'}
-                                      {service.icon === 'UserCheck' && '✅'}
-                                      {service.icon === 'Briefcase' && '💼'}
-                                      {service.icon === 'BarChart' && '📊'}
-                                      {service.icon === 'ShoppingCart' && '🛒'}
-                                      {service.icon === 'Bot' && '🤖'}
-                                      {service.icon === 'Code' && '💻'}
-                                      {service.icon === 'Cloud' && '☁️'}
-                                      {service.icon === 'MessageSquare' && '💬'}
-                                      {service.icon === 'PhoneCall' && '📞'}
-                                      {service.icon === 'GraduationCap' && '🎓'}
-                                      {service.icon === 'Presentation' && '📊'}
-                                      {service.icon === 'BookOpen' && '📖'}
-                                      {service.icon === 'BrainCircuit' && '🧠'}
-                                    </span>
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-start justify-between gap-2">
-                                      <h5 className="font-bold text-base text-black group-hover:text-current transition-colors line-clamp-2" style={{ color: hoveredService === service.id ? pillarData.color : '#000' }}>
-                                        {service.name}
-                                      </h5>
-                                      <ArrowRight 
-                                        className="arrow-indicator w-5 h-5 flex-shrink-0 mt-0.5" 
-                                        style={{ color: pillarData.color }}
-                                      />
-                                    </div>
-                                    <p className="text-sm text-gray-600 mt-2 line-clamp-2 leading-relaxed">
-                                      {service.description}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {hoveredService === service.id && (
-                                <div 
-                                  className="absolute bottom-0 left-0 right-0 h-1"
-                                  style={{ 
-                                    backgroundColor: pillarData.color,
-                                    boxShadow: `0 -2px 8px ${pillarData.color}40`
-                                  }}
-                                />
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                        <ArrowRight 
+                          className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0"
+                          style={{ color: pillarData.color }} 
+                        />
                       </div>
-                    )}
+
+                      <h3 className="text-xl font-bold text-black mb-2 group-hover:text-current transition-colors" style={{ color: isHovered ? pillarData.color : '#000' }}>
+                        {pillar}
+                      </h3>
+                      
+                      <p className="text-gray-600 text-sm mb-4 flex-grow line-clamp-3">
+                        {pillarData.description}
+                      </p>
+
+                      <div 
+                        className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between"
+                      >
+                        <span className="text-xs font-bold uppercase tracking-wider" style={{ color: pillarData.color }}>
+                          {pillarData.tagline}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 );
               })}
