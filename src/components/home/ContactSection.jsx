@@ -34,7 +34,7 @@ export default function ContactSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Contact Container (The Can) */}
         <div 
-          className="rounded-3xl p-8 md:p-12 border-4 border-solid relative overflow-hidden"
+          className="rounded-3xl p-8 md:p-12 border-4 border-solid relative"
           style={{
             backgroundColor: '#ffffff',
             borderColor: '#00bf63',
@@ -54,7 +54,7 @@ export default function ContactSection() {
                 📞
               </div>
               <h2 className="text-lg md:text-xl font-bold text-gray-900">
-                Get Started Today
+                Contact Us
               </h2>
             </div>
           </div>
