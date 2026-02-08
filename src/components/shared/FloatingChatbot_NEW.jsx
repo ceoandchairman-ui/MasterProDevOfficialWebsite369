@@ -407,37 +407,59 @@ Respond helpfully and concisely.`;
                 <div
                   key={msg.id || index}
                   className={cn(
-                    "mb-4 flex flex-col max-w-[85%]",
-                    msg.isBot ? "self-start items-start" : "self-end items-end ml-auto"
+                    "mb-4 flex gap-3 w-full",
+                    msg.isBot ? "justify-start" : "justify-end"
                   )}
                 >
-                  <div
-                    className={cn(
-                      "px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm",
-                      msg.isBot 
-                        ? "bg-[#1e1e1e] text-gray-100 border border-white/5 rounded-tl-sm"
-                        : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-sm"
+                  {/* Bot Avatar */}
+                  {msg.isBot && (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex flex-shrink-0 items-center justify-center mt-1">
+                      <Bot className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+
+                  <div className={cn(
+                    "flex flex-col max-w-[75%]",
+                    msg.isBot ? "items-start" : "items-end"
+                  )}>
+                    <div
+                      className={cn(
+                        "px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm",
+                        msg.isBot 
+                          ? "bg-[#1e1e1e] text-gray-100 border border-white/5 rounded-tl-sm"
+                          : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-sm"
+                      )}
+                    >
+                      {msg.text}
+                    </div>
+                    
+                    {/* Feedback for Bot */}
+                    {msg.isBot && index === messages.length - 1 && (
+                       <div className="mt-1 flex gap-2 opacity-50 hover:opacity-100 transition-opacity">
+                          <button onClick={() => handleFeedback(msg.id, true)} className="hover:text-green-400 p-1">
+                            <ThumbsUp className="w-3 h-3 text-gray-500" />
+                          </button>
+                          <button onClick={() => handleFeedback(msg.id, false)} className="hover:text-red-400 p-1">
+                            <ThumbsDown className="w-3 h-3 text-gray-500" />
+                          </button>
+                       </div>
                     )}
-                  >
-                    {msg.text}
                   </div>
-                  
-                  {/* Feedback for Bot */}
-                  {msg.isBot && index === messages.length - 1 && (
-                     <div className="mt-1 flex gap-2 opacity-50 hover:opacity-100 transition-opacity">
-                        <button onClick={() => handleFeedback(msg.id, true)} className="hover:text-green-400 p-1">
-                          <ThumbsUp className="w-3 h-3 text-gray-500" />
-                        </button>
-                        <button onClick={() => handleFeedback(msg.id, false)} className="hover:text-red-400 p-1">
-                          <ThumbsDown className="w-3 h-3 text-gray-500" />
-                        </button>
-                     </div>
+
+                  {/* User Avatar */}
+                  {!msg.isBot && (
+                    <div className="w-8 h-8 rounded-full bg-gray-700 flex flex-shrink-0 items-center justify-center mt-1">
+                      <User className="w-4 h-4 text-gray-300" />
+                    </div>
                   )}
                 </div>
               ))}
               
               {isLoading && (
-                <div className="flex items-start gap-2 mb-4">
+                <div className="flex items-start gap-3 mb-4">
+                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex flex-shrink-0 items-center justify-center mt-1">
+                      <Bot className="w-4 h-4 text-white" />
+                   </div>
                    <div className="bg-[#1e1e1e] px-4 py-3 rounded-2xl rounded-tl-sm border border-white/5 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                       <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
