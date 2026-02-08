@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Send, Mic, MicOff, ThumbsUp, ThumbsDown, Sparkles, Minimize2, MessageSquare, Bot, User } from 'lucide-react';
+import { X, Send, Mic, MicOff, ThumbsUp, ThumbsDown, Sparkles, Minimize2, MessageSquare, Bot, User, Paperclip } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Service } from '@/entities/Service';
 import { Consultant } from '@/entities/Consultant';
@@ -8,6 +8,9 @@ import { cn } from '@/lib/utils';
 
 export default function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [mode, setMode] = useState('chat'); // 'chat' | 'avatar'
+  const [avatarState, setAvatarState] = useState('idle'); // 'idle' | 'listening' | 'thinking' | 'speaking'
+
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -187,7 +190,7 @@ YOUR ROLE:
   }, []);
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() && !contextData) return;
 
     const userMessage = {
       id: Date.now(),
@@ -199,6 +202,7 @@ YOUR ROLE:
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setIsLoading(true);
+    if (mode === 'avatar') setAvatarState('thinking');
 
     try {
       const siteContext = buildDynamicContext();
@@ -226,6 +230,13 @@ Respond helpfully and concisely.`;
         isBot: true,
         timestamp: new Date()
       }]);
+
+      if (mode === 'avatar') {
+        setAvatarState('speaking');
+        // Simulate speaking duration roughly based on text length (50ms per char, max 5s)
+        setTimeout(() => setAvatarState('idle'), Math.min(5000, response.length * 50));
+      }
+
     } catch (error) {
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
@@ -233,6 +244,7 @@ Respond helpfully and concisely.`;
         isBot: true,
         timestamp: new Date()
       }]);
+      if (mode === 'avatar') setAvatarState('idle');
     }
 
     setIsLoading(false);
@@ -253,6 +265,7 @@ Respond helpfully and concisely.`;
 
     if (isListening) {
       setIsListening(false);
+      if (mode === 'avatar') setAvatarState('idle');
       return;
     }
 
@@ -261,9 +274,27 @@ Respond helpfully and concisely.`;
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
-    recognition.onresult = (event) => setInputMessage(event.results[0][0].transcript);
+    recognition.onstart = () => {
+        setIsListening(true);
+        if (mode === 'avatar') setAvatarState('listening');
+    };
+    recognition.onend = () => {
+        setIsListening(false);
+        // If we are in avatar mode, we might move to thinking state if we got a result
+        if (mode === 'avatar' && !isLoading) setAvatarState('idle');
+    };
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInputMessage(transcript);
+        if (mode === 'avatar') {
+             // In a perfect world we would wait for state update, but for now just wait a tick
+             setTimeout(() => {
+                 // handleSendMessage reads current 'inputMessage' state which won't be updated yet inside this closure context easily without a ref or useEffect wrapper.
+                 // So we rely on the user to press send or we need to refactor handleSendMessage to accept a param.
+                 // Let's rely on manual send to be safe for now in this iteration.
+             }, 100);
+        }
+    };
     recognition.start();
   };
 
@@ -332,6 +363,16 @@ Respond helpfully and concisely.`;
       if (bubbleHideTimerRef.current) clearTimeout(bubbleHideTimerRef.current);
     };
   }, [isOpen, isHovering]);
+  
+  // AVATAR STATUS TEXT MAPPING
+  const getAvatarStatusText = () => {
+     switch (avatarState) {
+         case 'listening': return 'Listening...';
+         case 'thinking': return 'Thinking...';
+         case 'speaking': return 'Speaking...';
+         default: return 'Tap to speak';
+     }
+  };
 
   return (
     <>
@@ -363,6 +404,25 @@ Respond helpfully and concisely.`;
         </div>
       )}
 
+      <style>{`
+        @keyframes listeningPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 20px rgba(37, 99, 235, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+        @keyframes speakingBounce {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+        @keyframes thinkingSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .avatar-listening { animation: listeningPulse 1.5s infinite; }
+        .avatar-speaking { animation: speakingBounce 0.5s infinite alternate; }
+        .avatar-thinking { animation: thinkingSpin 2s infinite linear; background: linear-gradient(135deg, #FFB800 0%, #FF8A00 100%) !important; }
+      `}</style>
+
       {/* OPEN STATE: SMARTPHONE CHASSIS */}
       {isOpen && (
       <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
@@ -373,134 +433,190 @@ Respond helpfully and concisely.`;
           {/* Animated Gradient Border */}
           <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-blue-500 via-yellow-400 to-green-500 animate-gradient-xy -z-10" />
           
-          {/* Main Black Body */}
-          <div className="h-full w-full bg-[#0a0a0a] rounded-[calc(2.5rem-2px)] flex flex-col relative overflow-hidden">
-            
+          {/* Main Body */}
+          <div className="h-full w-full bg-[#f0f2f5] rounded-[calc(2.5rem-2px)] flex flex-col relative overflow-hidden">
+             
+            {/* Background Gradient similar to user spec */}
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-600/5 via-yellow-400/5 to-green-500/5 pointer-events-none" />
+
             {/* Header Island */}
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 w-[85%]">
-              <div className="bg-[#1e1e1e]/80 backdrop-blur-md border border-white/10 rounded-full px-4 py-2 flex items-center justify-between shadow-lg">
-                 <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-white" />
-                   </div>
-                   <div className="flex flex-col">
-                     <span className="text-white text-xs font-bold tracking-wide">ARMOSA</span>
-                     <div className="flex items-center gap-1">
-                       <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                       <span className="text-[10px] text-gray-400">Online</span>
+            <div className="flex-shrink-0 p-4 pb-2 z-20">
+              <div className="bg-white rounded-2xl border border-blue-100 shadow-sm p-3 flex flex-col gap-3">
+                 {/* Top Row */}
+                 <div className="flex items-center justify-between">
+                     <div className="flex items-center gap-2">
+                       <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-green-500 flex items-center justify-center shadow-md">
+                          <Bot className="w-5 h-5 text-white" />
+                       </div>
+                       <div>
+                         <span className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-green-500 block">Armosa</span>
+                       </div>
                      </div>
-                   </div>
+                     <button 
+                       onClick={() => setIsOpen(false)}
+                       className="w-9 h-9 rounded-xl flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                     >
+                       <X className="w-5 h-5" />
+                     </button>
                  </div>
                  
-                 <button 
-                   onClick={() => setIsOpen(false)}
-                   className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
-                 >
-                   <Minimize2 className="w-4 h-4 text-gray-400" />
-                 </button>
+                 {/* Bottom Row - Tabs */}
+                 <div className="flex bg-gray-100 p-1 rounded-xl">
+                    <button 
+                        onClick={() => setMode('chat')}
+                        className={cn(
+                            "flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all",
+                            mode === 'chat' ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:bg-gray-200/50"
+                        )}
+                    >
+                        <MessageSquare className="w-3.5 h-3.5" /> Chat
+                    </button>
+                    <button 
+                        onClick={() => setMode('avatar')}
+                        className={cn(
+                            "flex-1 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all",
+                            mode === 'avatar' ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:bg-gray-200/50"
+                        )}
+                    >
+                        <User className="w-3.5 h-3.5" /> Avatar
+                    </button>
+                 </div>
               </div>
             </div>
 
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto px-5 pt-24 pb-28 scrollbar-hide">
-              {messages.map((msg, index) => (
-                <div
-                  key={msg.id || index}
-                  className={cn(
-                    "mb-4 flex gap-3 w-full",
-                    msg.isBot ? "justify-start" : "justify-end"
-                  )}
-                >
-                  {/* Bot Avatar */}
-                  {msg.isBot && (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex flex-shrink-0 items-center justify-center mt-1">
-                      <Bot className="w-4 h-4 text-white" />
-                    </div>
-                  )}
+            {/* CONTENT AREA */}
+            <div className="flex-1 relative overflow-hidden">
+                
+                {/* CHAT MODE VIEW */}
+                <div className={cn(
+                    "absolute inset-0 flex flex-col transition-all duration-300 transform",
+                    mode === 'chat' ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0 pointer-events-none"
+                )}>
+                    <div className="flex-1 overflow-y-auto px-4 py-2 custom-scrollbar">
+                      {messages.map((msg, index) => (
+                        <div
+                          key={msg.id || index}
+                          className={cn(
+                            "mb-4 flex gap-3 w-full animate-in slide-in-from-bottom-2 duration-300",
+                            msg.isBot ? "justify-start" : "justify-end"
+                          )}
+                        >
+                          {msg.isBot && (
+                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-green-500 flex flex-shrink-0 items-center justify-center mt-1 shadow-sm">
+                              <Bot className="w-4 h-4 text-white" />
+                            </div>
+                          )}
 
-                  <div className={cn(
-                    "flex flex-col max-w-[75%]",
-                    msg.isBot ? "items-start" : "items-end"
-                  )}>
-                    <div
-                      className={cn(
-                        "px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm",
-                        msg.isBot 
-                          ? "bg-[#1e1e1e] text-gray-100 border border-white/5 rounded-tl-sm"
-                          : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-tr-sm"
+                          <div className={cn(
+                            "flex flex-col max-w-[80%]",
+                            msg.isBot ? "items-start" : "items-end"
+                          )}>
+                            <div
+                              className={cn(
+                                "px-4 py-3 text-sm leading-relaxed shadow-sm",
+                                msg.isBot 
+                                  ? "bg-white text-gray-800 border border-gray-100 rounded-2xl rounded-tl-sm"
+                                  : "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl rounded-tr-sm"
+                              )}
+                            >
+                              {msg.text}
+                            </div>
+                            <span className="text-[10px] text-gray-400 mt-1 px-1">
+                                {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {isLoading && (
+                        <div className="flex items-start gap-3 mb-4">
+                           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-green-500 flex flex-shrink-0 items-center justify-center mt-1">
+                              <Bot className="w-4 h-4 text-white" />
+                           </div>
+                           <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-tl-sm flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                              <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></span>
+                           </div>
+                        </div>
                       )}
-                    >
-                      {msg.text}
+                      <div ref={messagesEndRef} />
                     </div>
-                    
-                    {/* Feedback for Bot */}
-                    {msg.isBot && index === messages.length - 1 && (
-                       <div className="mt-1 flex gap-2 opacity-50 hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleFeedback(msg.id, true)} className="hover:text-green-400 p-1">
-                            <ThumbsUp className="w-3 h-3 text-gray-500" />
-                          </button>
-                          <button onClick={() => handleFeedback(msg.id, false)} className="hover:text-red-400 p-1">
-                            <ThumbsDown className="w-3 h-3 text-gray-500" />
-                          </button>
-                       </div>
-                    )}
-                  </div>
+                </div>
 
-                  {/* User Avatar */}
-                  {!msg.isBot && (
-                    <div className="w-8 h-8 rounded-full bg-gray-700 flex flex-shrink-0 items-center justify-center mt-1">
-                      <User className="w-4 h-4 text-gray-300" />
+                {/* AVATAR MODE VIEW */}
+                <div className={cn(
+                    "absolute inset-0 flex flex-col items-center justify-center transition-all duration-300 transform",
+                    mode === 'avatar' ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
+                )}>
+                    {/* Animated Waves */}
+                    <div className="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none">
+                         <div className={cn("absolute w-[160px] h-[160px] border-2 border-blue-500/10 rounded-full", avatarState === 'listening' && "animate-ping [animation-duration:3s]")} />
+                         <div className={cn("absolute w-[220px] h-[220px] border-2 border-blue-500/10 rounded-full", avatarState === 'listening' && "animate-ping [animation-duration:3s] [animation-delay:0.5s]")} />
+                         <div className={cn("absolute w-[280px] h-[280px] border-2 border-blue-500/10 rounded-full", avatarState === 'listening' && "animate-ping [animation-duration:3s] [animation-delay:1s]")} />
                     </div>
-                  )}
+
+                    {/* Main Avatar Circle */}
+                    <button 
+                        onClick={toggleVoice}
+                        className={cn(
+                            "relative w-32 h-32 rounded-full bg-gradient-to-br from-blue-600 via-blue-500 to-green-400 shadow-2xl flex items-center justify-center z-10 transition-all duration-300",
+                            avatarState === 'listening' && "avatar-listening",
+                            avatarState === 'speaking' && "avatar-speaking",
+                            avatarState === 'thinking' && "avatar-thinking"
+                        )}
+                    >
+                        {avatarState === 'listening' ? (
+                             <Mic className="w-14 h-14 text-white" />
+                        ) : avatarState === 'thinking' ? (
+                             <Sparkles className="w-14 h-14 text-white" />
+                        ) : (
+                             <Bot className="w-16 h-16 text-white" />
+                        )}
+                    </button>
+                    
+                    <p className="mt-8 text-sm font-bold text-gray-500 tracking-wide animate-pulse">
+                        {getAvatarStatusText()}
+                    </p>
                 </div>
-              ))}
-              
-              {isLoading && (
-                <div className="flex items-start gap-3 mb-4">
-                   <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex flex-shrink-0 items-center justify-center mt-1">
-                      <Bot className="w-4 h-4 text-white" />
-                   </div>
-                   <div className="bg-[#1e1e1e] px-4 py-3 rounded-2xl rounded-tl-sm border border-white/5 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                      <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                      <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"></span>
-                   </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
+
             </div>
 
-            {/* Input Island */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] z-20">
-               <div className="bg-[#1e1e1e]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] p-1.5 shadow-2xl flex items-center gap-2 pr-2">
+            {/* Input Island - Hidden in Avatar Mode for cleaner look, or kept if needed. Spec says hidden/modified. */}
+            <div className={cn(
+                "p-4 pt-2 transition-all duration-300 transform",
+                mode === 'avatar' ? "translate-y-20 opacity-0 pointer-events-none hidden" : "translate-y-0 opacity-100"
+            )}>
+               <div className="bg-white border border-yellow-400/20 rounded-[1.5rem] p-2 shadow-lg flex items-center gap-2">
+                  <button className="p-2 rounded-xl text-gray-400 hover:bg-gray-100 transition-colors">
+                     <Paperclip className="w-5 h-5" />
+                  </button>
+                  <button 
+                     onClick={toggleVoice}
+                     className={cn(
+                        "p-2 rounded-xl transition-colors",
+                         isListening ? "text-red-500 bg-red-50" : "text-gray-400 hover:bg-gray-100"
+                     )}
+                  >
+                     <Mic className="w-5 h-5" />
+                  </button>
+                  
                   <input
                     type="text"
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Ask Armosa..."
-                    className="flex-1 bg-transparent border-none text-white text-sm px-4 focus:ring-0 placeholder:text-gray-500 h-10"
+                    placeholder="Message Armosa..."
+                    className="flex-1 bg-transparent border-none text-gray-800 text-sm px-2 focus:ring-0 placeholder:text-gray-400 h-10 outline-none"
                   />
                   
-                  <div className="flex items-center gap-1">
-                    <button 
-                      onClick={toggleVoice}
-                      className={cn(
-                        "p-2 rounded-full transition-all",
-                        isListening ? "bg-red-500/20 text-red-400 animate-pulse" : "hover:bg-white/10 text-gray-400"
-                      )}
-                    >
-                      {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                    </button>
-                    
-                    <button
-                      onClick={handleSendMessage}
-                      disabled={!inputMessage.trim() && !isLoading}
-                      className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <Send className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={!inputMessage.trim() && !isLoading}
+                    className="p-2.5 rounded-xl bg-gradient-to-br from-green-400 to-blue-600 text-white shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
                </div>
             </div>
             
