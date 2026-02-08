@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { User } from '@/entities/User';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from './utils';
-import FloatingChatbot from './components/shared/FloatingChatbot';
+import FloatingChatbot from './components/shared/FloatingChatbot_NEW';
 import { 
   Menu, X, Search, Building, Phone, Mail, Rocket, MapPin, Facebook, Twitter, Linkedin, Instagram, LogOut, User as UserIcon
 } from 'lucide-react';
