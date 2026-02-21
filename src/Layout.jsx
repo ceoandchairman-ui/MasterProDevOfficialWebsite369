@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { User } from '@/entities/User';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from './utils';
+import ChatWidget from './components/shared/ChatWidget';
 import FloatingChatbot from './components/shared/FloatingChatbot_NEW';
 import { 
   Menu, X, Search, Building, Phone, Mail, Rocket, MapPin, Facebook, Twitter, Linkedin, Instagram, LogOut, User as UserIcon
@@ -72,7 +73,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <div className="bg-white text-gray-800 font-sans">
-      <FloatingChatbot />
+      <ChatWidget />
       
       <style>{`
         .brand-gold { color: #FBBC05; }
