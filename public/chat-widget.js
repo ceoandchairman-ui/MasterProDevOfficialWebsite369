@@ -1089,7 +1089,8 @@ class ArmosaChatWidget {
         // FAB
         const fab = document.createElement('button');
         fab.id = 'armosa-fab';
-        fab.innerHTML = '<iconify-icon icon="mdi:chat-processing-outline" style="font-size: 28px; color: white;"></iconify-icon>';
+        fab.innerHTML = '💬';
+        fab.style.fontSize = '28px';
         fab.title = 'Chat with MasterProDev AI';
         document.body.appendChild(fab);
         this.fab = fab;
