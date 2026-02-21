@@ -1492,9 +1492,17 @@ class ArmosaChatWidget {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    window.armosaChatWidget = new ArmosaChatWidget();
-});
+const initWidget = () => {
+    if (!window.armosaChatWidget) {
+        window.armosaChatWidget = new ArmosaChatWidget();
+    }
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initWidget);
+} else {
+    initWidget();
+}
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ArmosaChatWidget;
