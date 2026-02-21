@@ -41,16 +41,22 @@ export default function ChatWidget({
     script.async = true;
     
     script.onload = () => {
-      // Configure the widget with custom endpoints if provided
-      if (window.armosaChatWidget) {
-        // Update config if widget already exists
-        window.armosaChatWidget.config.apiUrl = apiUrl;
-        window.armosaChatWidget.config.voiceUrl = voiceUrl;
-        window.armosaChatWidget.config.loginUrl = loginUrl;
+      // Ensure the class is available before instantiating
+      if (typeof window.ArmosaChatWidget !== 'undefined') {
+        if (!window.armosaChatWidget) {
+          window.armosaChatWidget = new window.ArmosaChatWidget({
+            apiUrl,
+            voiceUrl,
+            loginUrl
+          });
+        } else {
+          // Update config if widget already exists
+          window.armosaChatWidget.config.apiUrl = apiUrl;
+          window.armosaChatWidget.config.voiceUrl = voiceUrl;
+          window.armosaChatWidget.config.loginUrl = loginUrl;
+        }
       } else {
-        // Widget will auto-initialize on DOMContentLoaded
-        // If we're here after DOM is loaded, we might need to re-initialize
-        console.warn('ArmosaChatWidget not initialized. Widget should auto-initialize on DOM load.');
+        console.error('ArmosaChatWidget class not found after script load.');
       }
     };
     
