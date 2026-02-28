@@ -46,7 +46,32 @@ class ArmosaChatWidget {
         this.mediaRecorder = null;
         this.audioChunks = [];
         this.selectedFile = null;
-        
+
+        // Avatar customization
+        this.currentAvatarId = localStorage.getItem('armosa_selected_avatar') || 'bot';
+        this.AVATAR_GALLERY = [
+            { id: 'bot',     name: 'AI Assistant',   thumbnail: '🤖', icon: 'mdi:robot-happy',         url: null },
+            { id: 'woman',   name: 'Business Woman', thumbnail: '👩\u200d💼', icon: 'mdi:face-woman-outline', url: 'https://models.readyplayer.me/64bfa15f0e72c63d7c3934a6.glb?morphTargets=ARKit,Oculus+Visemes&textureAtlas=1024' },
+            { id: 'man',     name: 'Business Man',   thumbnail: '👨\u200d💼', icon: 'mdi:face-man-outline',   url: null },
+            { id: 'support', name: 'Support Agent',  thumbnail: '🧑\u200d💻', icon: 'mdi:face-agent',         url: null },
+        ];
+
+        // Three.js 3D Avatar state (lazy-loaded when avatar tab first opened)
+        this.three = {
+            loaded: false,
+            scene: null, camera: null, renderer: null,
+            avatar: null, mixer: null, clock: null,
+            mouthMorphTarget: null, visemeInfluences: {},
+            animFrameId: null
+        };
+
+        // Lip-sync state
+        this.lipSync = {
+            interval: null,
+            targetViseme: 'viseme_sil',
+            blendFactor: 0
+        };
+
         // Auth state
         this.authToken = null;
         this.userEmail = null;
@@ -83,8 +108,31 @@ class ArmosaChatWidget {
     }
     
     updateAuthUI() {
-        // Auth UI removed by request
-        return;
+        const statusEl = this.widget && this.widget.querySelector('#armosa-user-status');
+        if (!statusEl) return;
+
+        if (this.authToken && this.userEmail) {
+            const initials = this.userEmail.charAt(0).toUpperCase();
+            const displayName = this.userEmail.split('@')[0];
+            statusEl.innerHTML = `
+                <div class="armosa-user-badge">
+                    <div class="armosa-user-avatar">${initials}</div>
+                    <span class="armosa-user-name">${displayName}</span>
+                    <button class="armosa-logout-btn" title="Sign out">
+                        <iconify-icon icon="mdi:logout-variant" style="font-size: 14px;"></iconify-icon>
+                    </button>
+                </div>
+            `;
+            statusEl.querySelector('.armosa-logout-btn').addEventListener('click', () => this.performLogout());
+        } else {
+            statusEl.innerHTML = `
+                <button class="armosa-login-btn" title="Sign in">
+                    <iconify-icon icon="mdi:login-variant" style="font-size: 14px;"></iconify-icon>
+                    <span>Sign in</span>
+                </button>
+            `;
+            statusEl.querySelector('.armosa-login-btn').addEventListener('click', () => this.showLoginModal());
+        }
     }
     
     showLoginModal() {
@@ -196,6 +244,7 @@ class ArmosaChatWidget {
         
         this.injectStyles();
         this.createWidget();
+        this.populateAvatarSelector();
         this.attachEventListeners();
         
         // Load saved auth state and update UI
@@ -218,6 +267,389 @@ class ArmosaChatWidget {
         }
     }
 
+    // ==================== AVATAR CUSTOMIZATION ====================
+
+    populateAvatarSelector() {
+        const dropdown = this.widget && this.widget.querySelector('#avatar-selector-dropdown');
+        const toggle   = this.widget && this.widget.querySelector('#avatar-selector-toggle');
+        if (!dropdown || !toggle) return;
+
+        // Build option buttons
+        dropdown.innerHTML = '';
+        this.AVATAR_GALLERY.forEach(avatar => {
+            const btn = document.createElement('button');
+            btn.className = 'avatar-option' + (avatar.id === this.currentAvatarId ? ' selected' : '');
+            btn.dataset.avatarId = avatar.id;
+            btn.innerHTML = `
+                <span class="avatar-option-thumb">${avatar.thumbnail}</span>
+                <span class="avatar-option-name">${avatar.name}</span>
+                <iconify-icon class="avatar-option-check" icon="mdi:check-bold" style="font-size:14px;"></iconify-icon>
+            `;
+            btn.addEventListener('click', () => {
+                this.selectAvatar(avatar.id);
+                dropdown.classList.remove('open');
+            });
+            dropdown.appendChild(btn);
+        });
+
+        // Toggle open/close
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('open');
+        });
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (!dropdown.contains(e.target) && e.target !== toggle) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        // Apply currently saved avatar icon on init
+        this.selectAvatar(this.currentAvatarId);
+    }
+
+    selectAvatar(id) {
+        const entry = this.AVATAR_GALLERY.find(a => a.id === id);
+        if (!entry) return;
+
+        this.currentAvatarId = id;
+        localStorage.setItem('armosa_selected_avatar', id);
+
+        // Update 2D fallback avatar-circle icon
+        const circle = this.widget && this.widget.querySelector('#avatar-circle iconify-icon');
+        if (circle) circle.setAttribute('icon', entry.icon);
+
+        // Refresh selected state in dropdown
+        const dropdown = this.widget && this.widget.querySelector('#avatar-selector-dropdown');
+        if (dropdown) {
+            dropdown.querySelectorAll('.avatar-option').forEach(opt => {
+                opt.classList.toggle('selected', opt.dataset.avatarId === id);
+            });
+        }
+
+        // If 3D is already running, hot-swap the model
+        if (this.three.loaded && this.three.scene) {
+            this.load3DAvatarModel(id);
+        }
+    }
+
+    // ==================== 3D AVATAR ====================
+
+    loadThreeJS() {
+        return new Promise((resolve, reject) => {
+            if (window.THREE && window.THREE.GLTFLoader) { resolve(); return; }
+            const baseUrl = 'https://cdn.jsdelivr.net/npm/three@0.128.0';
+
+            const load = (src) => new Promise((res, rej) => {
+                const s = document.createElement('script');
+                s.src = src;
+                s.onload = res;
+                s.onerror = rej;
+                document.head.appendChild(s);
+            });
+
+            load(`${baseUrl}/build/three.min.js`)
+                .then(() => load(`${baseUrl}/examples/js/loaders/GLTFLoader.js`))
+                .then(resolve)
+                .catch(reject);
+        });
+    }
+
+    async init3DAvatar() {
+        if (this.three.loaded) return;
+
+        const statusEl = this.widget && this.widget.querySelector('#avatar-status-text');
+        if (statusEl) statusEl.textContent = 'Loading 3D engine...';
+
+        try {
+            await this.loadThreeJS();
+        } catch (e) {
+            console.warn('ArmosaWidget: Three.js failed to load, using 2D fallback.', e);
+            if (statusEl) statusEl.textContent = 'Tap to speak';
+            return;
+        }
+
+        const T = window.THREE;
+        const container = this.avatarView;
+        const canvas = this.widget.querySelector('#armosa-avatar-canvas');
+        if (!container || !canvas) return;
+
+        // Scene
+        this.three.scene = new T.Scene();
+        this.three.scene.background = new T.Color(0xEFF6FF);
+
+        // Camera
+        const w = container.clientWidth || 300;
+        const h = container.clientHeight || 300;
+        this.three.camera = new T.PerspectiveCamera(45, w / h, 0.1, 100);
+        this.three.camera.position.set(0, 1.5, 2.2);
+
+        // Renderer
+        this.three.renderer = new T.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        this.three.renderer.setSize(w, h);
+        this.three.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        if (T.sRGBEncoding) this.three.renderer.outputEncoding = T.sRGBEncoding;
+
+        // Lighting
+        this.three.scene.add(new T.AmbientLight(0xffffff, 0.6));
+        const dir = new T.DirectionalLight(0xffffff, 0.8);
+        dir.position.set(5, 10, 7.5);
+        this.three.scene.add(dir);
+        const fill = new T.DirectionalLight(0x00C896, 0.3);
+        fill.position.set(-5, 5, -5);
+        this.three.scene.add(fill);
+
+        this.three.clock = new T.Clock();
+        this.three.loaded = true;
+
+        // Show canvas, hide 2D circle
+        canvas.style.display = 'block';
+        const circle2D = this.widget.querySelector('#avatar-circle');
+        if (circle2D) circle2D.style.display = 'none';
+
+        // Resize observer
+        if (window.ResizeObserver) {
+            new ResizeObserver(() => this.onAvatar3DResize()).observe(container);
+        }
+
+        // Load the selected avatar model
+        this.load3DAvatarModel(this.currentAvatarId);
+
+        // Start render loop
+        this.animate3D();
+    }
+
+    load3DAvatarModel(avatarId) {
+        const T = window.THREE;
+        if (!T || !this.three.scene) return;
+
+        const entry = this.AVATAR_GALLERY.find(a => a.id === avatarId) || this.AVATAR_GALLERY[0];
+        const statusEl = this.widget && this.widget.querySelector('#avatar-status-text');
+
+        // Remove previous avatar
+        if (this.three.avatar) {
+            this.three.scene.remove(this.three.avatar);
+            this.three.avatar = null;
+            this.three.mixer = null;
+            this.three.mouthMorphTarget = null;
+            this.three.visemeInfluences = {};
+        }
+
+        if (entry.url) {
+            // Load GLTF/GLB from ReadyPlayerMe
+            if (statusEl) statusEl.textContent = `Loading ${entry.name}...`;
+
+            const loader = new T.GLTFLoader();
+            loader.load(
+                entry.url,
+                (gltf) => {
+                    this.three.avatar = gltf.scene;
+                    this.three.avatar.position.set(0, 0, 0);
+                    this.three.scene.add(this.three.avatar);
+
+                    // Find morph targets for lip sync (Feature #6)
+                    this.three.avatar.traverse((child) => {
+                        if (child.isMesh && child.morphTargetInfluences && child.morphTargetDictionary) {
+                            this.three.mouthMorphTarget = child;
+                            const VISEME_NAMES = [
+                                'viseme_sil','viseme_PP','viseme_FF','viseme_TH','viseme_DD',
+                                'viseme_kk','viseme_CH','viseme_SS','viseme_nn','viseme_RR',
+                                'viseme_aa','viseme_E','viseme_I','viseme_O','viseme_U'
+                            ];
+                            VISEME_NAMES.forEach(name => {
+                                if (child.morphTargetDictionary[name] !== undefined) {
+                                    this.three.visemeInfluences[name] = child.morphTargetDictionary[name];
+                                }
+                            });
+                        }
+                    });
+
+                    // Play idle animation if available
+                    if (gltf.animations && gltf.animations.length > 0) {
+                        this.three.mixer = new T.AnimationMixer(this.three.avatar);
+                        this.three.mixer.clipAction(gltf.animations[0]).play();
+                    }
+
+                    if (statusEl) statusEl.textContent = 'Tap to speak';
+                },
+                (progress) => {
+                    if (progress.total && statusEl) {
+                        const pct = Math.round((progress.loaded / progress.total) * 100);
+                        statusEl.textContent = `Loading ${entry.name}... ${pct}%`;
+                    }
+                },
+                (err) => {
+                    console.warn('ArmosaWidget: Failed to load GLB:', err);
+                    this.createFallback3DAvatar(entry);
+                    if (statusEl) statusEl.textContent = 'Tap to speak';
+                }
+            );
+        } else {
+            // No URL — create a geometric fallback shape
+            this.createFallback3DAvatar(entry);
+            if (statusEl) statusEl.textContent = 'Tap to speak';
+        }
+    }
+
+    createFallback3DAvatar(entry) {
+        const T = window.THREE;
+        if (!T || !this.three.scene) return;
+
+        // Head sphere
+        const headGeo = new T.SphereGeometry(0.35, 32, 32);
+        const headMat = new T.MeshStandardMaterial({ color: 0x2563EB });
+        const head = new T.Mesh(headGeo, headMat);
+        head.position.set(0, 1.6, 0);
+
+        // Body cylinder
+        const bodyGeo = new T.CylinderGeometry(0.22, 0.28, 0.75, 32);
+        const bodyMat = new T.MeshStandardMaterial({ color: 0x00C896 });
+        const body = new T.Mesh(bodyGeo, bodyMat);
+        body.position.set(0, 1.0, 0);
+
+        const group = new T.Group();
+        group.add(head);
+        group.add(body);
+        group.position.set(0, -0.3, 0);
+
+        this.three.avatar = group;
+        this.three.scene.add(group);
+    }
+
+    animate3D() {
+        if (!this.three.loaded) return;
+
+        this.three.animFrameId = requestAnimationFrame(() => this.animate3D());
+
+        const delta = this.three.clock ? this.three.clock.getDelta() : 0.016;
+
+        if (this.three.mixer) this.three.mixer.update(delta);
+
+        // Viseme-based lip sync
+        const mt = this.three.mouthMorphTarget;
+        const vi = this.three.visemeInfluences;
+        if (mt && Object.keys(vi).length > 0) {
+            this.lipSync.blendFactor = Math.min(this.lipSync.blendFactor + delta * 12, 1);
+            const VNAMES = [
+                'viseme_sil','viseme_PP','viseme_FF','viseme_TH','viseme_DD',
+                'viseme_kk','viseme_CH','viseme_SS','viseme_nn','viseme_RR',
+                'viseme_aa','viseme_E','viseme_I','viseme_O','viseme_U'
+            ];
+            VNAMES.forEach(name => {
+                if (vi[name] !== undefined) {
+                    const idx = vi[name];
+                    const cur = mt.morphTargetInfluences[idx];
+                    if (name === this.lipSync.targetViseme) {
+                        mt.morphTargetInfluences[idx] = cur + (0.7 - cur) * this.lipSync.blendFactor;
+                    } else {
+                        mt.morphTargetInfluences[idx] = cur * 0.85;
+                    }
+                }
+            });
+        }
+
+        // Gentle idle rotation for fallback avatars
+        if (this.three.avatar && !this.three.mixer) {
+            this.three.avatar.rotation.y = Math.sin(Date.now() * 0.001) * 0.15;
+        }
+
+        if (this.three.renderer && this.three.scene && this.three.camera) {
+            this.three.renderer.render(this.three.scene, this.three.camera);
+        }
+    }
+
+    onAvatar3DResize() {
+        if (!this.three.camera || !this.three.renderer || !this.avatarView) return;
+        const w = this.avatarView.clientWidth;
+        const h = this.avatarView.clientHeight;
+        if (!w || !h) return;
+        this.three.camera.aspect = w / h;
+        this.three.camera.updateProjectionMatrix();
+        this.three.renderer.setSize(w, h);
+    }
+
+    // ==================== LIP-SYNC ====================
+
+    // Character-to-viseme mapping (approximate English phonemes)
+    get CHAR_TO_VISEME() {
+        return {
+            'a':'viseme_aa','à':'viseme_aa','á':'viseme_aa',
+            'e':'viseme_E', 'è':'viseme_E', 'é':'viseme_E',
+            'i':'viseme_I', 'ì':'viseme_I', 'í':'viseme_I','y':'viseme_I',
+            'o':'viseme_O', 'ò':'viseme_O', 'ó':'viseme_O',
+            'u':'viseme_U', 'ù':'viseme_U', 'ú':'viseme_U','w':'viseme_U',
+            'p':'viseme_PP','b':'viseme_PP','m':'viseme_PP',
+            'f':'viseme_FF','v':'viseme_FF',
+            't':'viseme_DD','d':'viseme_DD',
+            'k':'viseme_kk','g':'viseme_kk','c':'viseme_kk','q':'viseme_kk',
+            's':'viseme_SS','z':'viseme_SS','x':'viseme_SS',
+            'n':'viseme_nn','l':'viseme_nn',
+            'r':'viseme_RR',
+            'j':'viseme_CH','h':'viseme_CH',
+            ' ':'viseme_sil','.':'viseme_sil',',':'viseme_sil','!':'viseme_sil','?':'viseme_sil'
+        };
+    }
+
+    textToVisemes(text) {
+        const visemes = [];
+        const map = this.CHAR_TO_VISEME;
+        const words = text.toLowerCase().split(/\s+/);
+        for (const word of words) {
+            for (let i = 0; i < word.length; i++) {
+                const char = word[i];
+                // Handle digraphs
+                if (i < word.length - 1) {
+                    const dg = char + word[i + 1];
+                    if (dg === 'th') { visemes.push('viseme_TH'); i++; continue; }
+                    if (dg === 'ch' || dg === 'sh') { visemes.push('viseme_CH'); i++; continue; }
+                }
+                visemes.push(map[char] || 'viseme_sil');
+            }
+            visemes.push('viseme_sil'); // silence between words
+        }
+        return visemes;
+    }
+
+    startTextLipSync(text, durationMs) {
+        this.stopLipSync();
+        const visemes = this.textToVisemes(text);
+        if (!visemes.length) return;
+        const msPerViseme = Math.max(durationMs / visemes.length, 30);
+        let idx = 0;
+        this.lipSync.interval = setInterval(() => {
+            if (idx >= visemes.length) { this.stopLipSync(); return; }
+            this.lipSync.targetViseme = visemes[idx++];
+            this.lipSync.blendFactor = 0;
+        }, msPerViseme);
+    }
+
+    startSimulatedLipSync() {
+        this.stopLipSync();
+        const vowels = ['viseme_aa','viseme_E','viseme_O','viseme_I','viseme_U','viseme_sil'];
+        this.lipSync.interval = setInterval(() => {
+            this.lipSync.targetViseme = Math.random() > 0.25
+                ? vowels[Math.floor(Math.random() * vowels.length)]
+                : 'viseme_sil';
+            this.lipSync.blendFactor = 0;
+        }, 80);
+    }
+
+    stopLipSync() {
+        if (this.lipSync.interval) {
+            clearInterval(this.lipSync.interval);
+            this.lipSync.interval = null;
+        }
+        this.lipSync.targetViseme = 'viseme_sil';
+        this.lipSync.blendFactor = 0;
+        // Zero-out all morph targets
+        const mt = this.three.mouthMorphTarget;
+        const vi = this.three.visemeInfluences;
+        if (mt && Object.keys(vi).length > 0) {
+            Object.values(vi).forEach(idx => { mt.morphTargetInfluences[idx] = 0; });
+        }
+    }
+
     injectStyles() {
         const styleId = 'armosa-widget-styles';
         const existing = document.getElementById(styleId);
@@ -227,18 +659,8 @@ class ArmosaChatWidget {
         style.id = styleId;
         style.textContent = `
             /* ============================================================
-               ARMOSA CHAT WIDGET v4.0 - "MOBILE APP" EDITION
-               ============================================================
-               
-               BRAND COLORS:
-               - Blue:  #2563EB (Primary Accent)
-               - Gold:  #FFB800 (Highlight)
-               - Green: #00C896 (Action/Success)
-               
-               SMARTPHONE METAPHOR:
-               - Widget = Phone Chassis (rounded, gradient bezel)
-               - Background = Mobile Wallpaper (gradient)
-               - Components = Floating App Cards (islands)
+               ARMOSA CHAT WIDGET v5.0 - "PRODUCT" EDITION
+               Clean, minimal, ChatGPT/Anthropic-inspired design language.
                ============================================================ */
 
             /* ==================== HARD RESET ==================== */
@@ -260,25 +682,23 @@ class ArmosaChatWidget {
                 position: fixed !important;
                 bottom: 24px !important;
                 right: 24px !important;
-                width: 60px !important;
-                height: 60px !important;
+                width: 52px !important;
+                height: 52px !important;
                 border-radius: 50% !important;
-                background: linear-gradient(135deg, #2563EB 0%, #00C896 100%) !important;
-                border: 3px solid #FFB800 !important;
+                background: #00C896 !important;
                 cursor: pointer !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
                 z-index: 999998 !important;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                box-shadow: 0 4px 20px rgba(0, 200, 150, 0.4),
-                            0 2px 8px rgba(0, 0, 0, 0.15) !important;
+                transition: all 0.2s ease !important;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18) !important;
             }
 
             #armosa-fab:hover {
-                transform: scale(1.1) rotate(10deg) !important;
-                box-shadow: 0 6px 28px rgba(0, 200, 150, 0.5),
-                            0 4px 12px rgba(0, 0, 0, 0.2) !important;
+                background: #009977 !important;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22) !important;
+                transform: scale(1.05) !important;
             }
 
             #armosa-fab.hidden {
@@ -287,64 +707,55 @@ class ArmosaChatWidget {
                 pointer-events: none !important;
             }
 
-            /* ==================== WIDGET - THE "SMARTPHONE" ==================== */
+            /* ==================== WIDGET ==================== */
             #armosa-widget {
                 all: unset !important;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif !important;
                 position: fixed !important;
-                bottom: 24px !important;
+                bottom: 84px !important;
                 right: 24px !important;
                 width: 380px !important;
-                height: 680px !important;
-                border-radius: 32px !important;
+                height: 660px !important;
+                border-radius: 16px !important;
                 display: flex !important;
                 flex-direction: column !important;
                 z-index: 999999 !important;
-                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
                 transform-origin: bottom right !important;
-                
-                /* Gradient "Bezel" Border */
-                background: linear-gradient(135deg, #2563EB 0%, #FFB800 50%, #00C896 100%) !important;
-                padding: 3px !important;
-                
-                box-shadow: 
-                    0 25px 60px -12px rgba(0, 0, 0, 0.35),
-                    0 0 0 1px rgba(255, 255, 255, 0.1) inset !important;
+                background: #ffffff !important;
+                border: 1px solid rgba(0, 0, 0, 0.1) !important;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
                 overflow: hidden !important;
             }
 
             #armosa-widget.hidden {
-                transform: translateY(20px) scale(0.95) !important;
+                transform: translateY(12px) scale(0.97) !important;
                 opacity: 0 !important;
                 pointer-events: none !important;
             }
 
-            /* ==================== INNER CONTAINER - "PHONE SCREEN" ==================== */
+            /* ==================== INNER CONTAINER ==================== */
             #armosa-widget .widget-inner {
                 flex: 1 !important;
-                background: linear-gradient(180deg, 
-                    rgba(37, 99, 235, 0.08) 0%, 
-                    rgba(255, 184, 0, 0.05) 50%, 
-                    rgba(0, 200, 150, 0.08) 100%) !important;
-                border-radius: 29px !important;
+                background: #ffffff !important;
+                border-radius: 0 !important;
                 display: flex !important;
                 flex-direction: column !important;
-                gap: 12px !important;
-                padding: 12px !important;
+                gap: 0 !important;
+                padding: 0 !important;
                 overflow: hidden !important;
             }
 
-            /* ==================== HEADER ISLAND ==================== */
+            /* ==================== HEADER ==================== */
             #armosa-widget .armosa-header {
-                background: #FFFFFF !important;
-                border-radius: 20px !important;
-                border: 2px solid rgba(37, 99, 235, 0.15) !important;
+                background: #ffffff !important;
+                border-radius: 0 !important;
+                border-bottom: 1px solid #e8e8e8 !important;
                 display: flex !important;
                 flex-direction: column !important;
-                padding: 12px 16px !important;
+                padding: 12px 16px 10px !important;
                 flex-shrink: 0 !important;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-                gap: 12px !important;
+                gap: 10px !important;
             }
 
             #armosa-widget .header-row-top {
@@ -361,23 +772,20 @@ class ArmosaChatWidget {
             }
 
             #armosa-widget .armosa-logo {
-                width: 36px !important;
-                height: 36px !important;
-                background: linear-gradient(135deg, #2563EB 0%, #00C896 100%) !important;
-                border-radius: 10px !important;
+                width: 32px !important;
+                height: 32px !important;
+                background: #2563EB !important;
+                border-radius: 8px !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                box-shadow: 0 2px 8px rgba(0, 200, 150, 0.3) !important;
             }
 
             #armosa-widget .armosa-title {
-                font-size: 16px !important;
-                font-weight: 700 !important;
-                background: linear-gradient(90deg, #2563EB, #00C896) !important;
-                -webkit-background-clip: text !important;
-                -webkit-text-fill-color: transparent !important;
-                background-clip: text !important;
+                font-size: 15px !important;
+                font-weight: 600 !important;
+                color: #202123 !important;
+                letter-spacing: -0.01em !important;
             }
 
             #armosa-widget .header-right {
@@ -388,57 +796,57 @@ class ArmosaChatWidget {
 
             #armosa-widget .close-btn {
                 all: unset !important;
-                width: 36px !important;
-                height: 36px !important;
-                border-radius: 10px !important;
+                width: 32px !important;
+                height: 32px !important;
+                border-radius: 8px !important;
                 background: transparent !important;
                 cursor: pointer !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                color: #71717A !important;
-                transition: all 0.2s ease !important;
+                color: #71717a !important;
+                transition: all 0.15s ease !important;
             }
 
             #armosa-widget .close-btn:hover {
-                background: #FEE2E2 !important;
-                color: #EF4444 !important;
+                background: #f4f4f5 !important;
+                color: #18181b !important;
             }
 
             #armosa-widget .header-row-bottom {
                 display: flex !important;
                 width: 100% !important;
-                background: #F4F4F5 !important;
-                border-radius: 12px !important;
-                padding: 4px !important;
-                gap: 4px !important;
+                background: #f4f4f5 !important;
+                border-radius: 10px !important;
+                padding: 3px !important;
+                gap: 2px !important;
             }
 
             #armosa-widget .tab-btn {
                 all: unset !important;
                 flex: 1 !important;
-                padding: 8px !important;
+                padding: 7px 8px !important;
                 text-align: center !important;
                 border-radius: 8px !important;
                 font-size: 13px !important;
-                font-weight: 600 !important;
-                color: #71717A !important;
+                font-weight: 500 !important;
+                color: #71717a !important;
                 cursor: pointer !important;
-                transition: all 0.2s ease !important;
+                transition: all 0.15s ease !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                gap: 6px !important;
+                gap: 5px !important;
             }
 
             #armosa-widget .tab-btn.active {
-                background: white !important;
-                color: #2563EB !important;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+                background: #ffffff !important;
+                color: #00C896 !important;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
             }
 
             #armosa-widget .tab-btn:hover:not(.active) {
-                background: rgba(0,0,0,0.04) !important;
+                color: #3f3f46 !important;
             }
 
             /* ==================== AUTH UI ELEMENTS ==================== */
@@ -446,7 +854,7 @@ class ArmosaChatWidget {
                 all: unset !important;
                 padding: 6px 12px !important;
                 border-radius: 8px !important;
-                background: linear-gradient(135deg, #2563EB 0%, #00C896 100%) !important;
+                background: #00C896 !important;
                 color: white !important;
                 font-size: 12px !important;
                 font-weight: 600 !important;
@@ -454,28 +862,28 @@ class ArmosaChatWidget {
                 display: flex !important;
                 align-items: center !important;
                 gap: 4px !important;
-                transition: all 0.2s ease !important;
+                transition: background 0.15s ease !important;
             }
 
             #armosa-widget .auth-login-btn:hover {
-                transform: scale(1.05) !important;
-                box-shadow: 0 2px 8px rgba(0, 200, 150, 0.3) !important;
+                background: #009977 !important;
+            }
             }
 
             #armosa-widget .auth-user-info {
                 display: flex !important;
                 align-items: center !important;
                 gap: 6px !important;
-                padding: 4px 10px !important;
-                background: rgba(0, 200, 150, 0.1) !important;
-                border-radius: 8px !important;
-                border: 1px solid rgba(0, 200, 150, 0.2) !important;
+                padding: 4px 8px !important;
+                background: #f4f4f5 !important;
+                border-radius: 20px !important;
+                border: none !important;
             }
 
             #armosa-widget .auth-user-email {
                 font-size: 12px !important;
-                font-weight: 600 !important;
-                color: #2563EB !important;
+                font-weight: 500 !important;
+                color: #3f3f46 !important;
                 max-width: 80px !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
@@ -492,13 +900,12 @@ class ArmosaChatWidget {
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                color: #71717A !important;
-                transition: all 0.2s ease !important;
+                color: #a1a1aa !important;
+                transition: all 0.15s ease !important;
             }
 
             #armosa-widget .auth-logout-btn:hover {
-                background: #FEE2E2 !important;
-                color: #EF4444 !important;
+                color: #ef4444 !important;
             }
 
             /* ==================== LOGIN MODAL ==================== */
@@ -508,7 +915,7 @@ class ArmosaChatWidget {
                 left: 0 !important;
                 right: 0 !important;
                 bottom: 0 !important;
-                background: rgba(0, 0, 0, 0.5) !important;
+                background: rgba(0, 0, 0, 0.45) !important;
                 backdrop-filter: blur(4px) !important;
                 display: flex !important;
                 align-items: center !important;
@@ -516,8 +923,8 @@ class ArmosaChatWidget {
                 z-index: 100 !important;
                 opacity: 0 !important;
                 pointer-events: none !important;
-                transition: opacity 0.3s ease !important;
-                border-radius: 28px !important;
+                transition: opacity 0.2s ease !important;
+                border-radius: 15px !important;
             }
 
             #armosa-login-modal.visible {
@@ -527,114 +934,109 @@ class ArmosaChatWidget {
 
             #armosa-login-modal .login-card {
                 background: white !important;
-                border-radius: 20px !important;
-                padding: 28px !important;
+                border-radius: 16px !important;
+                padding: 24px !important;
                 width: 85% !important;
                 max-width: 300px !important;
                 box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important;
-                border: 2px solid rgba(0, 200, 150, 0.15) !important;
+                border: 1px solid rgba(0,0,0,0.08) !important;
             }
 
             #armosa-login-modal .login-title {
-                font-size: 20px !important;
-                font-weight: 700 !important;
+                font-size: 18px !important;
+                font-weight: 600 !important;
                 text-align: center !important;
                 margin-bottom: 20px !important;
-                background: linear-gradient(90deg, #2563EB, #00C896) !important;
-                -webkit-background-clip: text !important;
-                -webkit-text-fill-color: transparent !important;
-                background-clip: text !important;
+                color: #18181b !important;
             }
 
             #armosa-login-modal .login-input {
                 all: unset !important;
                 width: 100% !important;
-                padding: 12px 14px !important;
-                border: 2px solid #E4E4E7 !important;
-                border-radius: 12px !important;
+                padding: 10px 14px !important;
+                border: 1px solid #e5e5e5 !important;
+                border-radius: 10px !important;
                 font-size: 14px !important;
-                background: #FAFAFA !important;
-                margin-bottom: 12px !important;
+                background: #fafafa !important;
+                margin-bottom: 10px !important;
                 box-sizing: border-box !important;
-                transition: border-color 0.2s ease !important;
+                transition: border-color 0.15s ease !important;
             }
 
             #armosa-login-modal .login-input:focus {
-                border-color: #2563EB !important;
+                border-color: #00C896 !important;
                 background: white !important;
+                box-shadow: 0 0 0 2px rgba(0,200,150,0.1) !important;
             }
 
             #armosa-login-modal .login-input::placeholder {
-                color: #A1A1AA !important;
+                color: #a1a1aa !important;
             }
 
             #armosa-login-modal .login-error {
-                color: #EF4444 !important;
+                color: #ef4444 !important;
                 font-size: 12px !important;
                 text-align: center !important;
-                margin-bottom: 12px !important;
+                margin-bottom: 10px !important;
                 min-height: 16px !important;
             }
 
             #armosa-login-modal .login-submit {
                 all: unset !important;
                 width: 100% !important;
-                padding: 12px !important;
-                background: linear-gradient(135deg, #2563EB 0%, #00C896 100%) !important;
+                padding: 10px !important;
+                background: #00C896 !important;
                 color: white !important;
                 font-size: 14px !important;
                 font-weight: 600 !important;
                 text-align: center !important;
-                border-radius: 12px !important;
+                border-radius: 10px !important;
                 cursor: pointer !important;
                 box-sizing: border-box !important;
-                transition: all 0.2s ease !important;
+                transition: background 0.15s ease !important;
             }
 
             #armosa-login-modal .login-submit:hover:not(:disabled) {
-                transform: translateY(-2px) !important;
-                box-shadow: 0 4px 16px rgba(0, 200, 150, 0.4) !important;
+                background: #009977 !important;
             }
 
             #armosa-login-modal .login-submit:disabled {
-                opacity: 0.7 !important;
+                opacity: 0.6 !important;
                 cursor: not-allowed !important;
             }
 
             #armosa-login-modal .login-cancel {
                 all: unset !important;
                 width: 100% !important;
-                padding: 10px !important;
+                padding: 8px !important;
                 text-align: center !important;
                 font-size: 13px !important;
-                color: #71717A !important;
+                color: #71717a !important;
                 cursor: pointer !important;
-                margin-top: 8px !important;
+                margin-top: 6px !important;
                 box-sizing: border-box !important;
             }
 
             #armosa-login-modal .login-cancel:hover {
-                color: #2563EB !important;
-                text-decoration: underline !important;
+                color: #00C896 !important;
             }
 
-            /* ==================== CHAT ISLAND (MESSAGES PLANE) ==================== */
+            /* ==================== MESSAGES ==================== */
             #armosa-widget .armosa-messages {
                 flex: 1 !important;
-                background: #FFFFFF !important;
-                border-radius: 20px !important;
-                border: 2px solid rgba(0, 200, 150, 0.12) !important;
+                background: #ffffff !important;
+                border-radius: 0 !important;
+                border: none !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
-                padding: 16px !important;
+                padding: 20px 16px !important;
                 display: flex !important;
                 flex-direction: column !important;
-                gap: 12px !important;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+                gap: 16px !important;
             }
 
             #armosa-widget .armosa-messages::-webkit-scrollbar {
-                width: 6px !important;
+                width: 4px !important;
             }
 
             #armosa-widget .armosa-messages::-webkit-scrollbar-track {
@@ -642,8 +1044,8 @@ class ArmosaChatWidget {
             }
 
             #armosa-widget .armosa-messages::-webkit-scrollbar-thumb {
-                background: linear-gradient(180deg, #2563EB, #00C896) !important;
-                border-radius: 3px !important;
+                background: #d4d4d8 !important;
+                border-radius: 2px !important;
             }
 
             /* ==================== MESSAGE BUBBLES ==================== */
@@ -666,13 +1068,12 @@ class ArmosaChatWidget {
                 width: 36px !important;
                 height: 36px !important;
                 min-width: 36px !important;
-                border-radius: 12px !important;
-                background: linear-gradient(135deg, #2563EB 0%, #00C896 100%) !important;
+                border-radius: 50% !important;
+                background: #2563EB !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
                 flex-shrink: 0 !important;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
             }
 
             #armosa-widget .message-group.user .message-avatar {
@@ -687,29 +1088,29 @@ class ArmosaChatWidget {
             }
 
             #armosa-widget .bot-message-content {
-                background: #F4F4F5 !important;
-                border: 1px solid #E4E4E7 !important;
-                border-radius: 18px 18px 18px 4px !important;
-                padding: 12px 16px !important;
+                background: #eef2ff !important;
+                border: none !important;
+                border-radius: 18px !important;
+                padding: 10px 14px !important;
                 font-size: 14px !important;
                 line-height: 1.6 !important;
-                color: #18181B !important;
+                color: #18181b !important;
             }
 
             #armosa-widget .bot-message-content strong {
-                color: #00C896 !important;
+                color: #18181b !important;
                 font-weight: 600 !important;
             }
 
             #armosa-widget .bot-message-content em {
-                color: #2563EB !important;
+                color: #18181b !important;
             }
 
             #armosa-widget .user-message-content {
-                background: linear-gradient(135deg, #00C896 0%, #2563EB 100%) !important;
-                border-radius: 18px 18px 4px 18px !important;
-                padding: 12px 16px !important;
-                color: #FFFFFF !important;
+                background: #00C896 !important;
+                border-radius: 18px !important;
+                padding: 10px 14px !important;
+                color: #ffffff !important;
                 font-size: 14px !important;
                 line-height: 1.6 !important;
             }
@@ -722,6 +1123,21 @@ class ArmosaChatWidget {
 
             #armosa-widget .message-group.user .message-time {
                 text-align: right !important;
+            }
+
+            /* Error / system messages — gold attention color */
+            #armosa-widget .message-group.error .message-avatar {
+                background: #FFB800 !important;
+            }
+
+            #armosa-widget .error-message-content {
+                background: rgba(255, 184, 0, 0.1) !important;
+                border: 1px solid rgba(255, 184, 0, 0.25) !important;
+                border-radius: 18px !important;
+                padding: 10px 14px !important;
+                font-size: 14px !important;
+                line-height: 1.6 !important;
+                color: #78350f !important;
             }
 
             /* ==================== CODE BLOCKS ==================== */
@@ -790,8 +1206,8 @@ class ArmosaChatWidget {
             }
 
             #armosa-widget .list-block {
-                background: rgba(0, 200, 150, 0.05) !important;
-                border-left: 3px solid #00C896 !important;
+                background: rgba(37, 99, 235, 0.05) !important;
+                border-left: 3px solid #2563EB !important;
                 border-radius: 0 12px 12px 0 !important;
                 padding: 12px 14px !important;
                 margin-top: 8px !important;
@@ -817,6 +1233,76 @@ class ArmosaChatWidget {
                 color: #00C896 !important;
             }
 
+            /* ==================== VOICE VIEW ==================== */
+            #armosa-widget .voice-view {
+                flex: 1 !important;
+                display: none !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background: #fafafa !important;
+                border-radius: 0 !important;
+                border: none !important;
+                gap: 20px !important;
+            }
+
+            #armosa-widget .voice-view.active {
+                display: flex !important;
+            }
+
+            #armosa-widget .voice-orb {
+                width: 96px !important;
+                height: 96px !important;
+                border-radius: 50% !important;
+                background: #00C896 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                cursor: pointer !important;
+                box-shadow: 0 4px 20px rgba(0, 200, 150, 0.3) !important;
+                transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+                animation: voiceFloat 3s ease-in-out infinite !important;
+            }
+
+            #armosa-widget .voice-orb:hover {
+                transform: scale(1.06) !important;
+                box-shadow: 0 6px 24px rgba(0, 200, 150, 0.4) !important;
+            }
+
+            #armosa-widget .voice-orb.listening {
+                animation: voicePulse 1s ease-in-out infinite !important;
+                background: #ef4444 !important;
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7) !important;
+            }
+
+            #armosa-widget .voice-orb.speaking {
+                animation: voiceBounce 0.5s ease-in-out infinite alternate !important;
+                background: #00C896 !important;
+            }
+
+            @keyframes voiceFloat {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-8px); }
+            }
+
+            @keyframes voicePulse {
+                0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+                70% { transform: scale(1.1); box-shadow: 0 0 0 16px rgba(239, 68, 68, 0); }
+                100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            }
+
+            @keyframes voiceBounce {
+                from { transform: scale(1); }
+                to { transform: scale(1.06); }
+            }
+
+            #armosa-widget .voice-status-text {
+                font-size: 14px !important;
+                font-weight: 600 !important;
+                color: #71717A !important;
+                text-align: center !important;
+            }
+
             /* ==================== AVATAR VIEW ==================== */
             #armosa-widget .avatar-view {
                 flex: 1 !important;
@@ -824,9 +1310,9 @@ class ArmosaChatWidget {
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
-                background: #FFFFFF !important;
-                border-radius: 20px !important;
-                border: 2px solid rgba(0, 200, 150, 0.12) !important;
+                background: #fafafa !important;
+                border-radius: 0 !important;
+                border: none !important;
                 padding: 20px !important;
                 position: relative !important;
                 overflow: hidden !important;
@@ -836,18 +1322,43 @@ class ArmosaChatWidget {
                 display: flex !important;
             }
 
+            /* 3D canvas fills the avatar view */
+            #armosa-widget #armosa-avatar-canvas {
+                display: none;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                border-radius: 18px !important;
+                z-index: 3 !important;
+            }
+
+            /* Keep status text visible above canvas */
+            #armosa-widget .avatar-view .avatar-status-text {
+                position: absolute !important;
+                bottom: 14px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                z-index: 4 !important;
+                background: rgba(255,255,255,0.85) !important;
+                padding: 4px 12px !important;
+                border-radius: 20px !important;
+                backdrop-filter: blur(4px) !important;
+            }
+
             #armosa-widget .avatar-circle {
-                width: 120px !important;
-                height: 120px !important;
+                width: 110px !important;
+                height: 110px !important;
                 border-radius: 50% !important;
-                background: linear-gradient(135deg, #2563EB 0%, #00C896 100%) !important;
-                box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3) !important;
+                background: #00C896 !important;
+                box-shadow: 0 4px 20px rgba(0, 200, 150, 0.3) !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
                 position: relative !important;
                 z-index: 2 !important;
-                transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+                transition: transform 0.2s ease !important;
             }
             
             #armosa-widget .avatar-circle iconify-icon {
@@ -859,7 +1370,7 @@ class ArmosaChatWidget {
             /* Animations for states */
             #armosa-widget .avatar-circle.listening {
                 transform: scale(1.1) !important;
-                box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7) !important;
+                box-shadow: 0 0 0 0 rgba(0, 200, 150, 0.6) !important;
                 animation: listeningPulse 1.5s infinite !important;
             }
 
@@ -875,15 +1386,15 @@ class ArmosaChatWidget {
             @keyframes listeningPulse {
                 0% {
                     transform: scale(1);
-                    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+                    box-shadow: 0 0 0 0 rgba(0, 200, 150, 0.6);
                 }
                 70% {
                     transform: scale(1.1);
-                    box-shadow: 0 0 0 20px rgba(37, 99, 235, 0);
+                    box-shadow: 0 0 0 20px rgba(0, 200, 150, 0);
                 }
                 100% {
                     transform: scale(1);
-                    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+                    box-shadow: 0 0 0 0 rgba(0, 200, 150, 0);
                 }
             }
 
@@ -913,7 +1424,7 @@ class ArmosaChatWidget {
                 left: 50% !important;
                 transform: translate(-50%, -50%) !important;
                 border-radius: 50% !important;
-                border: 2px solid rgba(37, 99, 235, 0.1) !important;
+                border: 2px solid rgba(0, 200, 150, 0.12) !important;
                 z-index: 1 !important;
             }
 
@@ -924,18 +1435,19 @@ class ArmosaChatWidget {
             /* ==================== TYPING INDICATOR ==================== */
             #armosa-widget .typing-indicator {
                 display: flex !important;
-                gap: 5px !important;
-                padding: 12px 16px !important;
-                background: #F4F4F5 !important;
-                border-radius: 18px 18px 18px 4px !important;
+                gap: 4px !important;
+                padding: 10px 14px !important;
+                background: #eef2ff !important;
+                border-radius: 18px !important;
                 width: fit-content !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
             }
 
             #armosa-widget .typing-dot {
-                width: 8px !important;
-                height: 8px !important;
+                width: 7px !important;
+                height: 7px !important;
                 border-radius: 50% !important;
-                background: linear-gradient(135deg, #2563EB, #00C896) !important;
+                background: #2563EB !important;
                 animation: typingBounce 1.4s infinite !important;
             }
 
@@ -947,42 +1459,129 @@ class ArmosaChatWidget {
                 30% { transform: translateY(-8px); opacity: 1; }
             }
 
-            /* ==================== INPUT ISLAND ==================== */
-            #armosa-widget .armosa-input-container {
-                background: #FFFFFF !important;
-                border-radius: 20px !important;
-                border: 2px solid rgba(255, 184, 0, 0.15) !important;
+            /* ==================== INPUT AREA ==================== */
+            #armosa-widget .armosa-input-wrapper {
                 display: flex !important;
-                align-items: center !important;
-                padding: 8px 12px !important;
-                gap: 8px !important;
+                flex-direction: column !important;
+                border-top: 1px solid #e8e8e8 !important;
+                background: #ffffff !important;
                 flex-shrink: 0 !important;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
             }
 
-            #armosa-widget .action-btn {
+            #armosa-widget .file-attachment-area {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 6px !important;
+                padding: 0 16px !important;
+                max-height: 0 !important;
+                overflow: hidden !important;
+                transition: max-height 0.2s ease, padding 0.2s ease !important;
+            }
+
+            #armosa-widget .file-attachment-area.has-file {
+                max-height: 100px !important;
+                padding: 10px 16px 0 !important;
+            }
+
+            #armosa-widget .file-chip {
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                background: #f4f4f5 !important;
+                border: 1px solid #e5e5e5 !important;
+                border-radius: 10px !important;
+                padding: 8px 10px !important;
+                font-size: 12px !important;
+                color: #3f3f46 !important;
+                min-width: 0 !important;
+            }
+
+            #armosa-widget .file-chip-icon {
+                flex-shrink: 0 !important;
+                font-size: 18px !important;
+                line-height: 1 !important;
+            }
+
+            #armosa-widget .file-chip-info {
+                flex: 1 !important;
+                min-width: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 2px !important;
+            }
+
+            #armosa-widget .file-chip-name {
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+                font-size: 12px !important;
+                font-weight: 500 !important;
+                color: #18181b !important;
+            }
+
+            #armosa-widget .file-chip-size {
+                font-size: 10px !important;
+                color: #a1a1aa !important;
+            }
+
+            #armosa-widget .file-chip-remove {
                 all: unset !important;
-                width: 40px !important;
-                height: 40px !important;
-                border-radius: 12px !important;
-                background: #F4F4F5 !important;
+                flex-shrink: 0 !important;
+                width: 20px !important;
+                height: 20px !important;
+                border-radius: 50% !important;
+                background: #e5e5e5 !important;
+                color: #71717a !important;
                 cursor: pointer !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                color: #71717A !important;
-                transition: all 0.2s ease !important;
+                font-size: 12px !important;
+                transition: background 0.15s ease, color 0.15s ease !important;
+            }
+
+            #armosa-widget .file-chip-remove:hover {
+                background: #ef4444 !important;
+                color: white !important;
+            }
+
+            #armosa-widget .armosa-input-container {
+                background: transparent !important;
+                border-radius: 0 !important;
+                border-top: none !important;
+                display: flex !important;
+                align-items: center !important;
+                padding: 12px 16px !important;
+                gap: 8px !important;
+                flex-shrink: 0 !important;
+            }
+
+            #armosa-widget .action-btn {
+                all: unset !important;
+                width: 36px !important;
+                height: 36px !important;
+                border-radius: 8px !important;
+                background: transparent !important;
+                border: 1px solid #e5e5e5 !important;
+                cursor: pointer !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                color: #71717a !important;
+                transition: all 0.15s ease !important;
                 flex-shrink: 0 !important;
             }
 
             #armosa-widget .action-btn:hover {
-                background: #E4E4E7 !important;
-                color: #2563EB !important;
+                background: #f4f4f5 !important;
+                border-color: #d4d4d8 !important;
+                color: #00C896 !important;
             }
 
             #armosa-widget .action-btn.recording {
-                background: #EF4444 !important;
-                color: #FFFFFF !important;
+                background: #ef4444 !important;
+                border-color: #ef4444 !important;
+                color: #ffffff !important;
                 animation: recordPulse 1s infinite !important;
             }
 
@@ -994,36 +1593,45 @@ class ArmosaChatWidget {
             #armosa-widget #armosa-input {
                 all: unset !important;
                 flex: 1 !important;
-                min-height: 40px !important;
-                padding: 0 12px !important;
+                min-height: 36px !important;
+                max-height: 120px !important;
+                padding: 8px 12px !important;
                 font-size: 14px !important;
-                color: #18181B !important;
-                background: transparent !important;
+                color: #18181b !important;
+                background: #fafafa !important;
+                border: 1px solid #e5e5e5 !important;
+                border-radius: 10px !important;
+                transition: border-color 0.15s ease, background 0.15s ease !important;
+                resize: none !important;
+            }
+
+            #armosa-widget #armosa-input:focus {
+                border-color: #00C896 !important;
+                background: #ffffff !important;
+                box-shadow: 0 0 0 2px rgba(0, 200, 150, 0.1) !important;
             }
 
             #armosa-widget #armosa-input::placeholder {
-                color: #A1A1AA !important;
+                color: #a1a1aa !important;
             }
 
             #armosa-widget .send-btn {
                 all: unset !important;
-                width: 44px !important;
-                height: 44px !important;
-                border-radius: 14px !important;
-                background: linear-gradient(135deg, #00C896 0%, #2563EB 100%) !important;
+                width: 36px !important;
+                height: 36px !important;
+                border-radius: 8px !important;
+                background: #00C896 !important;
                 cursor: pointer !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                color: #FFFFFF !important;
-                transition: all 0.2s ease !important;
+                color: #ffffff !important;
+                transition: all 0.15s ease !important;
                 flex-shrink: 0 !important;
-                box-shadow: 0 4px 12px rgba(0, 200, 150, 0.35) !important;
             }
 
             #armosa-widget .send-btn:hover:not(:disabled) {
-                transform: scale(1.05) !important;
-                box-shadow: 0 6px 16px rgba(0, 200, 150, 0.45) !important;
+                background: #009977 !important;
             }
 
             #armosa-widget .send-btn:disabled {
@@ -1031,30 +1639,208 @@ class ArmosaChatWidget {
                 cursor: not-allowed !important;
             }
 
-            /* ==================== FILE PREVIEW ==================== */
-            #armosa-widget .file-preview {
-                display: none !important;
-                background: rgba(37, 99, 235, 0.08) !important;
-                border: 1px solid rgba(37, 99, 235, 0.2) !important;
-                border-radius: 10px !important;
-                padding: 8px 12px !important;
-                margin-bottom: 8px !important;
-                font-size: 12px !important;
-                color: #2563EB !important;
+            /* ==================== FILE PREVIEW (legacy hidden) ==================== */
+            #armosa-widget .file-preview { display: none !important; }
+
+            /* ==================== USER BUBBLE FILE CHIP ==================== */
+            #armosa-widget .bubble-file-chip {
+                display: flex !important;
                 align-items: center !important;
                 gap: 8px !important;
+                background: rgba(255,255,255,0.2) !important;
+                border: 1px solid rgba(255,255,255,0.35) !important;
+                border-radius: 10px !important;
+                padding: 7px 10px !important;
+                margin-bottom: 6px !important;
+                font-size: 12px !important;
+                color: white !important;
+                min-width: 0 !important;
             }
 
-            #armosa-widget .file-preview.active {
+            #armosa-widget .bubble-file-chip-info {
+                flex: 1 !important;
+                min-width: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 1px !important;
+            }
+
+            #armosa-widget .bubble-file-chip-name {
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+                font-size: 12px !important;
+                font-weight: 500 !important;
+                color: white !important;
+            }
+
+            #armosa-widget .bubble-file-chip-size {
+                font-size: 10px !important;
+                color: rgba(255,255,255,0.75) !important;
+            }
+
+            /* ==================== DRAG & DROP ==================== */
+            #armosa-widget .armosa-messages.drag-over {
+                outline: 2px dashed #00C896 !important;
+                outline-offset: -8px !important;
+                background: rgba(0, 200, 150, 0.04) !important;
+            }
+
+            /* ==================== USER AUTH STATUS ==================== */
+            #armosa-widget .armosa-user-status {
+                flex: 1 !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+            }
+
+            #armosa-widget .armosa-user-badge {
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                background: #f4f4f5 !important;
+                border-radius: 20px !important;
+                padding: 4px 10px 4px 4px !important;
+            }
+
+            #armosa-widget .armosa-user-avatar {
+                width: 24px !important;
+                height: 24px !important;
+                border-radius: 50% !important;
+                background: #00C896 !important;
+                color: white !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                flex-shrink: 0 !important;
+            }
+
+            #armosa-widget .armosa-user-name {
+                font-size: 12px !important;
+                font-weight: 500 !important;
+                color: #3f3f46 !important;
+                max-width: 70px !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
+            }
+
+            #armosa-widget .armosa-logout-btn {
+                all: unset !important;
+                cursor: pointer !important;
+                color: #71717A !important;
+                display: flex !important;
+                align-items: center !important;
+                transition: color 0.2s ease !important;
+            }
+
+            #armosa-widget .armosa-logout-btn:hover {
+                color: #EF4444 !important;
+            }
+
+            #armosa-widget .armosa-login-btn {
+                all: unset !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 4px !important;
+                padding: 5px 10px !important;
+                border-radius: 20px !important;
+                background: #00C896 !important;
+                color: white !important;
+                font-size: 12px !important;
+                font-weight: 600 !important;
+                cursor: pointer !important;
+                transition: background 0.15s ease !important;
+            }
+
+            #armosa-widget .armosa-login-btn:hover {
+                background: #009977 !important;
+            }
+
+            /* ==================== AVATAR SELECTOR ==================== */
+            #armosa-widget .avatar-selector {
+                position: relative !important;
+            }
+
+            #armosa-widget .avatar-selector-toggle {
+                all: unset !important;
+                width: 32px !important;
+                height: 32px !important;
+                border-radius: 8px !important;
+                background: transparent !important;
+                color: #71717a !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                cursor: pointer !important;
+                font-size: 18px !important;
+                transition: background 0.15s ease !important;
+            }
+
+            #armosa-widget .avatar-selector-toggle:hover {
+                background: #f4f4f5 !important;
+                color: #18181b !important;
+            }
+
+            #armosa-widget .avatar-selector-dropdown {
+                display: none !important;
+                position: absolute !important;
+                top: calc(100% + 6px) !important;
+                right: 0 !important;
+                background: #ffffff !important;
+                border: 1px solid #e5e5e5 !important;
+                border-radius: 12px !important;
+                padding: 4px !important;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.12) !important;
+                z-index: 9999 !important;
+                min-width: 160px !important;
+                flex-direction: column !important;
+                gap: 1px !important;
+            }
+
+            #armosa-widget .avatar-selector-dropdown.open {
                 display: flex !important;
             }
 
-            #armosa-widget .remove-file-btn {
+            #armosa-widget .avatar-option {
                 all: unset !important;
-                color: #EF4444 !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                padding: 8px 10px !important;
+                border-radius: 8px !important;
                 cursor: pointer !important;
-                font-size: 16px !important;
+                transition: background 0.15s ease !important;
+                font-size: 13px !important;
+                color: #18181b !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            #armosa-widget .avatar-option:hover {
+                background: #f4f4f5 !important;
+            }
+
+            #armosa-widget .avatar-option.selected {
+                background: rgba(0, 200, 150, 0.08) !important;
+                border-left: 2px solid #00C896 !important;
+            }
+
+            #armosa-widget .avatar-option-thumb {
+                font-size: 18px !important;
+                line-height: 1 !important;
+            }
+
+            #armosa-widget .avatar-option-check {
                 margin-left: auto !important;
+                color: #00C896 !important;
+                display: none !important;
+            }
+
+            #armosa-widget .avatar-option.selected .avatar-option-check {
+                display: block !important;
             }
 
             /* ==================== RESPONSIVE ==================== */
@@ -1065,19 +1851,10 @@ class ArmosaChatWidget {
                     border-radius: 0 !important;
                     bottom: 0 !important;
                     right: 0 !important;
-                    padding: 0 !important;
                 }
 
                 #armosa-widget .widget-inner {
                     border-radius: 0 !important;
-                    gap: 8px !important;
-                    padding: 8px !important;
-                }
-
-                #armosa-widget .armosa-header,
-                #armosa-widget .armosa-messages,
-                #armosa-widget .armosa-input-container {
-                    border-radius: 16px !important;
                 }
             }
         `;
@@ -1089,18 +1866,20 @@ class ArmosaChatWidget {
         // FAB
         const fab = document.createElement('button');
         fab.id = 'armosa-fab';
-        fab.innerHTML = '💬';
-        fab.style.fontSize = '28px';
+        fab.innerHTML = `<iconify-icon icon="mdi:chat-processing-outline" style="font-size: 28px; color: white;"></iconify-icon>`;
         fab.title = 'Chat with MasterProDev AI';
         document.body.appendChild(fab);
         this.fab = fab;
 
+        
         const widget = document.createElement('div');
         widget.id = 'armosa-widget';
         widget.classList.add('hidden');
         widget.innerHTML = `
             <div class="widget-inner">
+                <!-- HEADER ISLAND -->
                 <div class="armosa-header">
+                    <!-- Top Row: Logo, Title, Close -->
                     <div class="header-row-top">
                         <div class="header-left">
                             <div class="armosa-logo">
@@ -1108,50 +1887,83 @@ class ArmosaChatWidget {
                             </div>
                             <span class="armosa-title">MasterProDev</span>
                         </div>
+                        <div id="armosa-user-status" class="armosa-user-status"></div>
                         <div class="header-right">
-                            <button class="close-btn" id="close-widget" title="Close">
+                             <div class="avatar-selector">
+                                <button class="avatar-selector-toggle" id="avatar-selector-toggle" title="Change Avatar">
+                                    <iconify-icon icon="mdi:account-convert-outline"></iconify-icon>
+                                </button>
+                                <div class="avatar-selector-dropdown" id="avatar-selector-dropdown">
+                                    <!-- Options will be populated by JS -->
+                                </div>
+                            </div>
+                             <button class="close-btn" id="close-widget" title="Close">
                                 <iconify-icon icon="mdi:close" style="font-size: 18px;"></iconify-icon>
                             </button>
                         </div>
                     </div>
+                    
+                    <!-- Bottom Row: Navigation Tabs -->
                     <div class="header-row-bottom">
                         <button class="tab-btn active" data-mode="chat" title="Chat Mode">
-                            <iconify-icon icon="mdi:chat-outline" style="font-size: 16px;"></iconify-icon>
-                            Chat
+                             <iconify-icon icon="mdi:chat-outline" style="font-size: 16px;"></iconify-icon>
+                             Chat
+                        </button>
+                        <button class="tab-btn" data-mode="voice" title="Voice Mode">
+                             <iconify-icon icon="mdi:microphone-outline" style="font-size: 16px;"></iconify-icon>
+                             Voice
                         </button>
                         <button class="tab-btn" data-mode="avatar" title="Avatar Mode">
-                            <iconify-icon icon="mdi:face-man-shimmer-outline" style="font-size: 16px;"></iconify-icon>
-                            Avatar
+                             <iconify-icon icon="mdi:face-man-shimmer-outline" style="font-size: 16px;"></iconify-icon>
+                             Avatar
                         </button>
                     </div>
                 </div>
 
+                <!-- CHAT ISLAND (Default View) -->
                 <div class="armosa-messages" id="armosa-messages"></div>
 
+                <!-- VOICE ISLAND (Hidden by default) -->
+                <div class="voice-view" id="armosa-voice-view">
+                    <div class="voice-orb" id="voice-orb">
+                        <iconify-icon icon="mdi:microphone" style="font-size: 48px; color: white;"></iconify-icon>
+                    </div>
+                    <div class="voice-status-text" id="voice-status-text">Tap to speak</div>
+                </div>
+
+                <!-- AVATAR ISLAND (Hidden by default) -->
                 <div class="avatar-view" id="armosa-avatar-view">
                     <div class="avatar-wave"></div>
                     <div class="avatar-wave"></div>
                     <div class="avatar-wave"></div>
+                    <!-- 3D canvas - shown when Three.js loads -->
+                    <canvas id="armosa-avatar-canvas"></canvas>
+                    <!-- 2D fallback circle - shown while loading or if no GLB URL -->
                     <div class="avatar-circle" id="avatar-circle">
-                        <iconify-icon icon="mdi:robot-happy" style="font-size: 64px;"></iconify-icon>
+                         <iconify-icon icon="mdi:robot-happy" style="font-size: 64px;"></iconify-icon>
                     </div>
-                    <div class="avatar-status-text" id="avatar-status-text">I'm listening...</div>
+                    <div class="avatar-status-text" id="avatar-status-text">Tap to speak</div>
                 </div>
 
-                <div class="armosa-input-container" id="armosa-input-container">
-                    <input type="file" id="file-input" accept="audio/*,video/*,image/*,.pdf,.docx,.doc,.txt" style="display: none;">
-                    <button class="action-btn" id="file-btn" title="Attach file">
-                        <iconify-icon icon="mdi:paperclip" style="font-size: 20px;"></iconify-icon>
-                    </button>
-                    <button class="action-btn" id="voice-btn" title="Record voice">
-                        <iconify-icon icon="mdi:microphone" style="font-size: 20px;"></iconify-icon>
-                    </button>
-                    <input type="text" id="armosa-input" placeholder="Message Armosa...">
-                    <button class="send-btn" id="send-btn" title="Send">
-                        <iconify-icon icon="mdi:send" style="font-size: 20px;"></iconify-icon>
-                    </button>
+                <!-- INPUT WRAPPER: file area stacks above input row -->
+                <div class="armosa-input-wrapper" id="armosa-input-wrapper">
+                    <div class="file-attachment-area" id="file-attachment-area"></div>
+                    <div class="armosa-input-container" id="armosa-input-container">
+                        <input type="file" id="file-input" accept="audio/*,video/*,image/*,.pdf,.doc,.docx,.pptx,.ppt,.xlsx,.xls,.csv,.rtf,.txt,.md,.json,.xml,.html,.htm,.py,.js,.ts,.jsx,.tsx,.sql,.yaml,.yml" style="display: none;">
+                        <button class="action-btn" id="file-btn" title="Attach file">
+                            <iconify-icon icon="mdi:paperclip" style="font-size: 20px;"></iconify-icon>
+                        </button>
+                        <button class="action-btn" id="voice-btn" title="Record voice">
+                            <iconify-icon icon="mdi:microphone" style="font-size: 20px;"></iconify-icon>
+                        </button>
+                        <textarea id="armosa-input" placeholder="Message Armosa..." rows="1"></textarea>
+                        <button class="send-btn" id="send-btn" title="Send">
+                            <iconify-icon icon="mdi:send" style="font-size: 20px;"></iconify-icon>
+                        </button>
+                    </div>
                 </div>
 
+                <!-- LOGIN MODAL -->
                 <div id="armosa-login-modal">
                     <div class="login-card">
                         <div class="login-title">Sign In to Armosa</div>
@@ -1168,11 +1980,21 @@ class ArmosaChatWidget {
         document.body.appendChild(widget);
         this.widget = widget;
         this.messagesContainer = widget.querySelector('#armosa-messages');
+        
+        // Avatar View Elements
         this.avatarView = widget.querySelector('#armosa-avatar-view');
         this.avatarCircle = widget.querySelector('#avatar-circle');
         this.avatarStatusText = widget.querySelector('#avatar-status-text');
-        this.inputContainer = widget.querySelector('#armosa-input-container');
+
+        // Voice View Elements
+        this.voiceView = widget.querySelector('#armosa-voice-view');
+        this.voiceOrb = widget.querySelector('#voice-orb');
+
+        this.inputContainer = widget.querySelector('#armosa-input-wrapper');
+        
         this.isOpen = false;
+        
+        // Default state
         this.setAvatarState('idle');
     }
 
@@ -1198,6 +2020,12 @@ class ArmosaChatWidget {
             }
         });
 
+        // Auto-resize textarea
+        input.addEventListener('input', () => {
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+        });
+
         this.widget.querySelector('#send-btn').addEventListener('click', () => this.sendMessage());
 
         const fileBtn = this.widget.querySelector('#file-btn');
@@ -1206,65 +2034,164 @@ class ArmosaChatWidget {
         fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
 
         this.widget.querySelector('#voice-btn').addEventListener('click', () => this.toggleRecording());
+
+        // ── Drag & drop onto messages area ──────────────────────────────
+        const msgs = this.messagesContainer;
+        msgs.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            msgs.classList.add('drag-over');
+        });
+        msgs.addEventListener('dragleave', () => msgs.classList.remove('drag-over'));
+        msgs.addEventListener('drop', (e) => {
+            e.preventDefault();
+            msgs.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) { this.selectedFile = file; this.showFileChip(file); }
+        });
+
+        // ── Paste image from clipboard ───────────────────────────────────
+        input.addEventListener('paste', (e) => {
+            const items = e.clipboardData && e.clipboardData.items;
+            if (!items) return;
+            for (const item of items) {
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    e.preventDefault();
+                    const file = item.getAsFile();
+                    if (file) { this.selectedFile = file; this.showFileChip(file); }
+                    break;
+                }
+            }
+        });
     }
 
     switchMode(mode) {
         this.currentMode = mode;
+
+        // Update Tabs
         this.widget.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.mode === mode);
         });
 
-        if (mode === 'avatar') {
-            this.messagesContainer.style.display = 'none';
-            this.inputContainer.style.display = 'none';
+        // Hide all views first
+        this.messagesContainer.style.display = 'none';
+        this.inputContainer.style.display = 'none';
+        this.avatarView.classList.remove('active');
+        this.voiceView.classList.remove('active');
+        this.stopRecording();
+
+        if (mode === 'chat') {
+            this.messagesContainer.style.display = 'flex';
+            this.inputContainer.style.display = 'flex';
+        } else if (mode === 'voice') {
+            this.voiceView.classList.add('active');
+            this.voiceOrb.onclick = () => this.toggleRecording();
+            this.widget.querySelector('#voice-status-text').textContent = 'Tap to speak';
+        } else if (mode === 'avatar') {
             this.avatarView.classList.add('active');
             this.setAvatarState('idle');
             this.avatarCircle.onclick = () => this.toggleRecording();
-            this.avatarStatusText.textContent = "Tap to speak";
-        } else {
-            this.messagesContainer.style.display = 'flex';
-            this.inputContainer.style.display = 'flex';
-            this.avatarView.classList.remove('active');
-            this.stopRecording();
+            // Lazy-init 3D engine on first visit to avatar tab
+            this.init3DAvatar();
         }
     }
 
     setAvatarState(state) {
+        // States: 'idle', 'listening', 'thinking', 'speaking'
         this.avatarCircle.classList.remove('idle', 'listening', 'thinking', 'speaking');
         this.avatarCircle.classList.add(state);
+        
         const statusMap = {
             'idle': 'Tap to speak',
             'listening': 'Listening...',
             'thinking': 'Thinking...',
             'speaking': 'Speaking...'
         };
+        
         this.avatarStatusText.textContent = statusMap[state] || 'Ready';
     }
 
     handleFileSelect(e) {
         const file = e.target.files[0];
-        if (file) {
-            this.selectedFile = file;
-            this.showFilePreview(file.name);
+        if (!file) return;
+        const ACCEPTED_EXTS = new Set([
+            'pdf','doc','docx','pptx','ppt','xlsx','xls','csv','rtf',
+            'txt','md','json','xml','html','htm','log',
+            'jpg','jpeg','png','gif','bmp','webp','tiff','tif','ico',
+            'mp3','wav','m4a','ogg','flac','aac',
+            'mp4','avi','mov','mkv','webm',
+            'py','js','ts','jsx','tsx','java','c','cpp','h','cs','go','rs',
+            'rb','php','swift','kt','sh','bash','ps1','yaml','yml','toml','ini','sql',
+        ]);
+        const ext = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
+        if (ext && !ACCEPTED_EXTS.has(ext)) {
+            alert(`Unsupported file type ".${ext}".\nSupported: PDF, Word, PowerPoint, Excel, CSV, images, audio, video, and most code files.`);
+            return;
         }
+        if (file.size > 25 * 1024 * 1024) { alert('File too large. Maximum size is 25MB.'); return; }
+        this.selectedFile = file;
+        this.showFileChip(file);
     }
 
-    showFilePreview(filename) {
-        let preview = this.widget.querySelector('.file-preview');
-        if (!preview) {
-            preview = document.createElement('div');
-            preview.className = 'file-preview';
-            this.widget.querySelector('.armosa-input-container').insertBefore(preview, this.widget.querySelector('#file-btn'));
-        }
-        preview.innerHTML = `<iconify-icon icon="mdi:file-document" style="font-size: 16px;"></iconify-icon><span>${filename}</span><button class="remove-file-btn">✕</button>`;
-        preview.classList.add('active');
-        preview.querySelector('.remove-file-btn').addEventListener('click', () => this.removeFile());
+    showFileChip(file) {
+        const area = this.widget.querySelector('#file-attachment-area');
+        if (!area) return;
+
+        // Determine icon & color by type
+        const ext = file.name.split('.').pop().toLowerCase();
+        const iconMap = {
+            pdf: { icon: 'mdi:file-pdf-box', color: '#ef4444' },
+            doc: { icon: 'mdi:file-word-box', color: '#2563EB' },
+            docx: { icon: 'mdi:file-word-box', color: '#2563EB' },
+            txt: { icon: 'mdi:file-document-outline', color: '#71717a' },
+            jpg: { icon: 'mdi:file-image', color: '#f59e0b' },
+            jpeg: { icon: 'mdi:file-image', color: '#f59e0b' },
+            png: { icon: 'mdi:file-image', color: '#f59e0b' },
+            gif: { icon: 'mdi:file-image', color: '#f59e0b' },
+            mp3: { icon: 'mdi:file-music', color: '#8b5cf6' },
+            wav: { icon: 'mdi:file-music', color: '#8b5cf6' },
+            mp4: { icon: 'mdi:file-video', color: '#ec4899' },
+            webm: { icon: 'mdi:file-video', color: '#ec4899' }
+        };
+        const { icon, color } = iconMap[ext] || { icon: 'mdi:file-outline', color: '#71717a' };
+
+        // Format file size
+        const size = file.size;
+        const sizeStr = size < 1024 ? `${size} B`
+            : size < 1024 * 1024 ? `${(size / 1024).toFixed(1)} KB`
+            : `${(size / (1024 * 1024)).toFixed(1)} MB`;
+
+        area.innerHTML = `
+            <div class="file-chip">
+                <span class="file-chip-icon">
+                    <iconify-icon icon="${icon}" style="color: ${color}; font-size: 20px;"></iconify-icon>
+                </span>
+                <div class="file-chip-info">
+                    <span class="file-chip-name" title="${file.name}">${file.name}</span>
+                    <span class="file-chip-size">${sizeStr}</span>
+                </div>
+                <button class="file-chip-remove" title="Remove file">✕</button>
+            </div>
+        `;
+        area.classList.add('has-file');
+        area.querySelector('.file-chip-remove').addEventListener('click', () => this.removeFile());
+
+        // Update placeholder to show file is ready
+        const input = this.widget.querySelector('#armosa-input');
+        if (input) input.placeholder = 'Add a message (optional)...';
     }
 
     removeFile() {
         this.selectedFile = null;
-        const preview = this.widget.querySelector('.file-preview');
-        if (preview) preview.classList.remove('active');
+        const area = this.widget.querySelector('#file-attachment-area');
+        if (area) {
+            area.innerHTML = '';
+            area.classList.remove('has-file');
+        }
+        const fileInput = this.widget.querySelector('#file-input');
+        if (fileInput) fileInput.value = '';
+        // Reset placeholder
+        const input = this.widget && this.widget.querySelector('#armosa-input');
+        if (input) input.placeholder = 'Message Armosa...';
     }
 
     toggleRecording() {
@@ -1280,20 +2207,31 @@ class ArmosaChatWidget {
             .then(stream => {
                 this.mediaRecorder = new MediaRecorder(stream);
                 this.audioChunks = [];
+
                 this.mediaRecorder.ondataavailable = (e) => this.audioChunks.push(e.data);
+
                 this.mediaRecorder.onstart = () => {
                     this.isRecording = true;
                     this.widget.querySelector('#voice-btn').classList.add('recording');
                     if (this.currentMode === 'avatar') {
                         this.setAvatarState('listening');
+                    } else if (this.currentMode === 'voice') {
+                        this.voiceOrb.classList.add('listening');
+                        this.widget.querySelector('#voice-status-text').textContent = 'Listening... tap to stop';
                     }
                 };
+
                 this.mediaRecorder.onstop = () => {
                     this.isRecording = false;
                     this.widget.querySelector('#voice-btn').classList.remove('recording');
+                    if (this.currentMode === 'voice') {
+                        this.voiceOrb.classList.remove('listening');
+                        this.widget.querySelector('#voice-status-text').textContent = 'Processing...';
+                    }
                     const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
                     this.sendAudioMessage(audioBlob);
                 };
+
                 this.mediaRecorder.start();
             })
             .catch(err => console.error('Microphone access denied:', err));
@@ -1309,16 +2247,21 @@ class ArmosaChatWidget {
     sendAudioMessage(audioBlob) {
         const formData = new FormData();
         formData.append('audio', audioBlob, 'recording.webm');
+        
         this.showTypingIndicator();
         if (this.currentMode === 'avatar') this.setAvatarState('thinking');
+        if (this.currentMode === 'voice') this.widget.querySelector('#voice-status-text').textContent = 'Thinking...';
         
         fetch(this.config.voiceUrl, {
             method: 'POST',
             headers: this.authToken ? { 'Authorization': `Bearer ${this.authToken}` } : {},
             body: formData
-        }).then(async response => {
+        })
+        .then(async response => {
             if (!response.ok) throw new Error(`Voice request failed (${response.status})`);
+            
             const contentType = response.headers.get('Content-Type');
+            
             if (contentType && contentType.includes('application/json')) {
                 const data = await response.json();
                 if (data.transcription) this.addUserMessage(`🎤 "${data.transcription}"`);
@@ -1327,15 +2270,62 @@ class ArmosaChatWidget {
                     if (data.use_browser_tts && 'speechSynthesis' in window) {
                         this.speakText(data.response);
                     } else {
-                        if (this.currentMode === 'avatar') this.setAvatarState('idle');
+                        // Text only response in avatar mode?
+                         if (this.currentMode === 'avatar') this.setAvatarState('idle');
                     }
                 }
+            } else {
+                const audioResponse = await response.blob();
+                const transcription = response.headers.get('X-Transcription');
+                const responseText = response.headers.get('X-Response-Text');
+                
+                if (transcription) this.addUserMessage(`🎤 "${transcription}"`);
+                if (responseText) this.addBotMessage(decodeURIComponent(responseText));
+                
+                const audioUrl = URL.createObjectURL(audioResponse);
+                const audio = new Audio(audioUrl);
+
+                if (this.currentMode === 'avatar') this.setAvatarState('speaking');
+                if (this.currentMode === 'voice') {
+                    this.voiceOrb.classList.add('speaking');
+                    this.widget.querySelector('#voice-status-text').textContent = 'Speaking...';
+                }
+
+                // Start lip sync once we know the audio duration
+                audio.addEventListener('loadedmetadata', () => {
+                    if (this.three.loaded) {
+                        const durationMs = (audio.duration || 3) * 1000;
+                        const spokenText = responseText ? decodeURIComponent(responseText) : '';
+                        if (spokenText && Object.keys(this.three.visemeInfluences).length > 0) {
+                            this.startTextLipSync(spokenText, durationMs);
+                        } else {
+                            this.startSimulatedLipSync();
+                        }
+                    }
+                });
+
+                audio.play();
+                audio.onended = () => {
+                    this.stopLipSync();
+                    URL.revokeObjectURL(audioUrl);
+                    if (this.currentMode === 'avatar') this.setAvatarState('idle');
+                    if (this.currentMode === 'voice') {
+                        this.voiceOrb.classList.remove('speaking');
+                        this.widget.querySelector('#voice-status-text').textContent = 'Tap to speak';
+                    }
+                };
             }
-        }).catch(err => {
-            this.addBotMessage('Sorry, there was an error processing your voice message.');
+        })
+        .catch(err => {
+            this.addErrorMessage('Sorry, there was an error processing your voice message.');
             console.error('Voice error:', err);
             if (this.currentMode === 'avatar') this.setAvatarState('idle');
-        }).finally(() => this.removeTypingIndicator());
+            if (this.currentMode === 'voice') {
+                this.voiceOrb.classList.remove('listening', 'speaking');
+                this.widget.querySelector('#voice-status-text').textContent = 'Tap to speak';
+            }
+        })
+        .finally(() => this.removeTypingIndicator());
     }
 
     speakText(text) {
@@ -1344,8 +2334,32 @@ class ArmosaChatWidget {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
             utterance.rate = 1.0;
-            utterance.onstart = () => { if (this.currentMode === 'avatar') this.setAvatarState('speaking'); };
-            utterance.onend = () => { if (this.currentMode === 'avatar') this.setAvatarState('idle'); };
+
+            utterance.onstart = () => {
+                if (this.currentMode === 'avatar') this.setAvatarState('speaking');
+                if (this.currentMode === 'voice') {
+                    this.voiceOrb.classList.add('speaking');
+                    this.widget.querySelector('#voice-status-text').textContent = 'Speaking...';
+                }
+                // Estimate ~120 wpm → ~500ms/word; use text-based lip sync
+                const wordCount = text.split(/\s+/).length;
+                const estimatedMs = (wordCount / 120) * 60 * 1000;
+                if (this.three.loaded && Object.keys(this.three.visemeInfluences).length > 0) {
+                    this.startTextLipSync(text, estimatedMs);
+                } else if (this.three.loaded) {
+                    this.startSimulatedLipSync();
+                }
+            };
+
+            utterance.onend = () => {
+                this.stopLipSync();
+                if (this.currentMode === 'avatar') this.setAvatarState('idle');
+                if (this.currentMode === 'voice') {
+                    this.voiceOrb.classList.remove('speaking');
+                    this.widget.querySelector('#voice-status-text').textContent = 'Tap to speak';
+                }
+            };
+
             speechSynthesis.speak(utterance);
         }
     }
@@ -1355,41 +2369,96 @@ class ArmosaChatWidget {
         const message = input.value.trim();
         if (!message && !this.selectedFile) return;
 
-        const displayMessage = this.selectedFile ? `${message}\n📎 ${this.selectedFile.name}` : message;
-        this.addUserMessage(displayMessage || 'Please analyze this file');
+        this.addUserMessage(message, this.selectedFile);
         input.value = '';
+        input.style.height = 'auto';
         this.showTypingIndicator();
 
         const formData = new FormData();
         formData.append('message', message || 'Please analyze this file');
         if (this.conversationId) formData.append('conversation_id', this.conversationId);
         if (this.selectedFile) formData.append('file', this.selectedFile);
+        this.removeFile();
 
-        fetch(this.config.apiUrl, {
+        const streamUrl = this.config.apiUrl.replace(/\/chat$/, '/chat/stream');
+
+        fetch(streamUrl, {
             method: 'POST',
             headers: this.authToken ? { 'Authorization': `Bearer ${this.authToken}` } : {},
             body: formData
-        }).then(response => {
+        })
+        .then(response => {
             if (!response.ok) throw new Error(`Request failed (${response.status})`);
-            return response.json();
-        }).then(data => {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let botEl = null;
+            let buffer = '';
+
+            const processChunk = ({ done, value }) => {
+                if (done) { this.removeTypingIndicator(); return; }
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop();
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    try {
+                        const data = JSON.parse(line.slice(6));
+                        if (data.type === 'chunk') {
+                            if (!botEl) { this.removeTypingIndicator(); botEl = this.addStreamBotBubble(); }
+                            this.appendToStreamBubble(botEl, data.text);
+                        } else if (data.type === 'done') {
+                            if (data.conversation_id) this.conversationId = data.conversation_id;
+                            if (data.pending_auth && data.auth_url) {
+                                this.addBotMessage(`🔐 Authorization required. [Click here to authorize](${data.auth_url})`);
+                            }
+                        } else if (data.type === 'error') {
+                            this.removeTypingIndicator();
+                            this.addErrorMessage(data.text);
+                        }
+                    } catch (e) {}
+                }
+                return reader.read().then(processChunk);
+            };
+            return reader.read().then(processChunk);
+        })
+        .catch(err => {
             this.removeTypingIndicator();
-            if (data.conversation_id) this.conversationId = data.conversation_id;
-            this.addBotMessage(data.response);
-            if (data.pending_auth && data.auth_url) {
-                const authMsg = `🔐 **Authorization Required**\n\nPlease [click here to authorize](${data.auth_url}) access to your external account.`;
-                this.addBotMessage(authMsg);
-            }
-        }).catch(err => {
-            this.removeTypingIndicator();
-            this.addBotMessage('Sorry, I encountered an error. Please try again.');
+            this.addErrorMessage('Sorry, I encountered an error. Please try again.');
             console.error('Chat error:', err);
-        }).finally(() => this.removeFile());
+        });
     }
 
-    addUserMessage(message) {
+    addStreamBotBubble() {
+        const group = document.createElement('div');
+        group.className = 'message-group bot';
+        const av = document.createElement('div');
+        av.className = 'message-avatar';
+        av.innerHTML = '<iconify-icon icon="mdi:robot" style="font-size:18px;color:white;"></iconify-icon>';
+        group.appendChild(av);
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        const textDiv = document.createElement('div');
+        textDiv.className = 'bot-message-content stream-content';
+        bubble.appendChild(textDiv);
+        const time = document.createElement('div');
+        time.className = 'message-time';
+        time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        bubble.appendChild(time);
+        group.appendChild(bubble);
+        this.messagesContainer.appendChild(group);
+        this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+        return group;
+    }
+
+    appendToStreamBubble(group, text) {
+        const el = group.querySelector('.stream-content');
+        if (el) el.textContent += text;
+        this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+    }
+
+    addUserMessage(message, file = null) {
         this.messages.push({ role: 'user', content: message });
-        this.messagesContainer.appendChild(this.createMessageElement(message, 'user'));
+        this.messagesContainer.appendChild(this.createMessageElement(message, 'user', file));
         this.scrollToBottom();
     }
 
@@ -1399,21 +2468,66 @@ class ArmosaChatWidget {
         this.scrollToBottom();
     }
 
-    createMessageElement(content, role) {
+    addErrorMessage(message) {
+        this.messagesContainer.appendChild(this.createMessageElement(message, 'error'));
+        this.scrollToBottom();
+    }
+
+    createMessageElement(content, role, file = null) {
         const group = document.createElement('div');
         group.className = `message-group ${role}`;
+
         const avatar = document.createElement('div');
         avatar.className = 'message-avatar';
-        avatar.innerHTML = role === 'bot' ? '<iconify-icon icon="mdi:robot" style="font-size: 18px; color: white;"></iconify-icon>' : '<iconify-icon icon="mdi:account" style="font-size: 18px; color: white;"></iconify-icon>';
+        avatar.innerHTML = role === 'bot'
+            ? '<iconify-icon icon="mdi:robot" style="font-size: 18px; color: white;"></iconify-icon>'
+            : role === 'error'
+            ? '<iconify-icon icon="mdi:alert" style="font-size: 18px; color: white;"></iconify-icon>'
+            : '<iconify-icon icon="mdi:account" style="font-size: 18px; color: white;"></iconify-icon>';
         group.appendChild(avatar);
 
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
-        bubble.innerHTML = this.parseMessage(content, role);
+
+        // File chip inside user bubble (ChatGPT-style)
+        if (file && role === 'user') {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const iconMap = {
+                pdf:  { icon: 'mdi:file-pdf-box',         color: 'rgba(255,255,255,0.9)' },
+                doc:  { icon: 'mdi:file-word-box',         color: 'rgba(255,255,255,0.9)' },
+                docx: { icon: 'mdi:file-word-box',         color: 'rgba(255,255,255,0.9)' },
+                txt:  { icon: 'mdi:file-document-outline', color: 'rgba(255,255,255,0.9)' },
+                jpg:  { icon: 'mdi:file-image',            color: 'rgba(255,255,255,0.9)' },
+                jpeg: { icon: 'mdi:file-image',            color: 'rgba(255,255,255,0.9)' },
+                png:  { icon: 'mdi:file-image',            color: 'rgba(255,255,255,0.9)' },
+                mp3:  { icon: 'mdi:file-music',            color: 'rgba(255,255,255,0.9)' },
+                wav:  { icon: 'mdi:file-music',            color: 'rgba(255,255,255,0.9)' },
+                mp4:  { icon: 'mdi:file-video',            color: 'rgba(255,255,255,0.9)' },
+            };
+            const { icon } = iconMap[ext] || { icon: 'mdi:file-outline' };
+            const sz = file.size;
+            const sizeStr = sz < 1024 ? `${sz} B`
+                : sz < 1048576 ? `${(sz/1024).toFixed(1)} KB`
+                : `${(sz/1048576).toFixed(1)} MB`;
+            const chipDiv = document.createElement('div');
+            chipDiv.className = 'bubble-file-chip';
+            chipDiv.innerHTML = `
+                <iconify-icon icon="${icon}" style="font-size: 20px; flex-shrink: 0;"></iconify-icon>
+                <div class="bubble-file-chip-info">
+                    <span class="bubble-file-chip-name" title="${file.name}">${file.name}</span>
+                    <span class="bubble-file-chip-size">${sizeStr}</span>
+                </div>
+            `;
+            bubble.appendChild(chipDiv);
+        }
+
+        bubble.insertAdjacentHTML('beforeend', this.parseMessage(content, role));
+
         const time = document.createElement('div');
         time.className = 'message-time';
         time.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         bubble.appendChild(time);
+
         group.appendChild(bubble);
         return group;
     }
@@ -1421,6 +2535,7 @@ class ArmosaChatWidget {
     parseMessage(content, role) {
         let html = '';
         const blocks = content.split('\n\n');
+
         for (const block of blocks) {
             if (block.includes('```')) {
                 html += this.parseCodeBlock(block);
@@ -1440,12 +2555,25 @@ class ArmosaChatWidget {
         if (!match) return '';
         const language = match[1] || 'text';
         const code = match[2].trim();
-        return `<div class="code-block"><div class="code-header"><span class="code-language">${language}</span><button class="code-copy-btn">Copy</button></div><div class="code-content">${this.escapeHtml(code)}</div></div>`;
+        return `
+            <div class="code-block">
+                <div class="code-header">
+                    <span class="code-language">${language}</span>
+                    <button class="code-copy-btn" onclick="navigator.clipboard.writeText(\`${code.replace(/`/g, '\\`')}\`)">Copy</button>
+                </div>
+                <div class="code-content">${this.escapeHtml(code)}</div>
+            </div>
+        `;
     }
 
     parseRecommendation(block) {
         const lines = block.split('\n');
-        return `<div class="recommendation-block"><div class="recommendation-label">💡 ${this.escapeHtml(lines[0])}</div><div>${this.parseInlineMarkdown(lines.slice(1).join('\n'))}</div></div>`;
+        return `
+            <div class="recommendation-block">
+                <div class="recommendation-label">💡 ${this.escapeHtml(lines[0])}</div>
+                <div>${this.parseInlineMarkdown(lines.slice(1).join('\n'))}</div>
+            </div>
+        `;
     }
 
     parseList(block) {
@@ -1471,7 +2599,18 @@ class ArmosaChatWidget {
         const indicator = document.createElement('div');
         indicator.className = 'message-group';
         indicator.id = 'typing-indicator';
-        indicator.innerHTML = `<div class="message-avatar"><iconify-icon icon="mdi:robot" style="font-size: 18px; color: white;"></iconify-icon></div><div class="message-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+        indicator.innerHTML = `
+            <div class="message-avatar">
+                <iconify-icon icon="mdi:robot" style="font-size: 18px; color: white;"></iconify-icon>
+            </div>
+            <div class="message-bubble">
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        `;
         this.messagesContainer.appendChild(indicator);
         this.scrollToBottom();
     }
@@ -1492,18 +2631,22 @@ class ArmosaChatWidget {
     }
 }
 
-const initWidget = () => {
+// Auto-initialize
+function initializeArmosaWidget() {
     if (!window.armosaChatWidget) {
         window.armosaChatWidget = new ArmosaChatWidget();
     }
-};
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initWidget);
-} else {
-    initWidget();
 }
 
+// Handle various loading scenarios
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeArmosaWidget);
+} else {
+    // DOMContentLoaded has already fired
+    initializeArmosaWidget();
+}
+
+// ES Module export
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ArmosaChatWidget;
 }
