@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { API_URL } from '../../config';
 
 /**
  * ChatWidget Component
@@ -21,9 +22,9 @@ import { useEffect } from 'react';
  * <ChatWidget /> (will use default endpoints)
  */
 export default function ChatWidget({ 
-  apiUrl = '/chat',
-  voiceUrl = '/voice', 
-  loginUrl = '/login' 
+  apiUrl = `${API_URL}/chat`,
+  voiceUrl = `${API_URL}/voice`,
+  loginUrl = `${API_URL}/login`
 }) {
   useEffect(() => {
     // Load the chat widget script
