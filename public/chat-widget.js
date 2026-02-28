@@ -2646,6 +2646,8 @@ if (document.readyState === 'loading') {
     initializeArmosaWidget();
 }
 
+// Expose class on window for React integration
+window.ArmosaChatWidget = ArmosaChatWidget;
 // ES Module export
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ArmosaChatWidget;
