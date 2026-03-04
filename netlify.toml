@@ -9,10 +9,10 @@
   status = 200
 
 [context.production]
-  environment = { VITE_API_URL = "https://your-api.com/api" }
+  environment = { VITE_API_URL = "https://masterprodevmcpaiagent-production.up.railway.app" }
 
 [context.deploy-preview]
-  environment = { VITE_API_URL = "http://localhost:3000/api" }
+  environment = { VITE_API_URL = "https://masterprodevmcpaiagent-production.up.railway.app" }
 
 [context.branch-deploy]
-  environment = { VITE_API_URL = "http://localhost:3000/api" }
+  environment = { VITE_API_URL = "https://masterprodevmcpaiagent-production.up.railway.app" }

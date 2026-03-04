@@ -1,3 +1,5 @@
+import { API_URL } from '../config';
+
 const isNode = typeof window === 'undefined';
 const windowObj = isNode ? { localStorage: new Map() } : window;
 const storage = windowObj.localStorage;
@@ -36,7 +38,7 @@ const getAppParamValue = (paramName, { defaultValue = undefined, removeFromUrl =
 
 const getAppParams = () => {
 	return {
-		apiUrl: getAppParamValue("api_url", { defaultValue: import.meta.env.VITE_API_URL || 'http://localhost:3000/api' }),
+		apiUrl: getAppParamValue("api_url", { defaultValue: API_URL }),
 		token: getAppParamValue("access_token", { removeFromUrl: true }),
 	}
 }

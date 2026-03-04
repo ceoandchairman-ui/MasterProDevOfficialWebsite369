@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { API_URL } from '../config';
 
 // Mock consultant data
 const mockConsultants = [
@@ -76,7 +77,7 @@ const mockConsultants = [
 
 // Create a simple axios client for API calls
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: API_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
