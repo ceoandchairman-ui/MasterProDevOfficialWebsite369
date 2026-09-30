@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Pro Dev - Professional Services</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="testing-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="header-box">
+        <div class="header-container">
+            <!-- Left Side - Logo -->
+            <div class="logo-container">
+                <img src="Logo.jpg" alt="Master Pro Dev Logo" class="logo">
+            </div>
+    
+            <!-- Center - Company Name & Tagline -->
+            <div class="company-info">
+                <!-- Multi-Color Brand Name -->
+                <h1 class="company-name">
+                    <span class="brand-word-1">Master</span>
+                    <span class="brand-word-2">Pro</span>
+                    <span class="brand-word-3">Dev</span>
+                </h1>
+            
+                <!-- Tagline with Impactful Words -->
+                <p class="company-tagline">
+                    Where Profiles Shine 🌄 , Brands Rise 🏔️ and Opportunities Align 🌟
+                </p>
+            
+                <!-- Marquee for Dynamic Engagement -->
+                <div class="marquee-box">
+                    <marquee class="marquee-text" behavior="scroll" direction="left">
+                        🚀 Magnetize Attention | 🎯 Amplify Your Presence | 🌟 Elevate to Excellence | 💡 Shine Bright & Stand Out | 🔥 Command the Spotlight! 🚀
+                    </marquee>
+                </div>
+            </div>
+            
+    
+            <!-- Right Side - Additional Graphic -->
+            <div class="graphic-container">
+                <video class="graphic-image" autoplay loop muted playsinline>
+                    <source src="E:/Master_Pro_Dev_Copy/MasterProDev-master/animations/Final_video.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            
+        </div>
+    
+        <!-- Navigation Bar -->
+        <nav class="nav-container">
+            <a href="#" class="nav-item"><i class="fas fa-home"></i> Home</a>
+            <a href="about.html" class="nav-item"><i class="fas fa-info-circle"></i> About Us</a>
+            <a href="services.html" class="nav-item"><i class="fas fa-cogs"></i> Services</a>
+            <a href="consultants.html" class="nav-item"><i class="fas fa-users"></i> Consultants</a>
+            <a href="payment.html" class="nav-item"><i class="fas fa-credit-card"></i> Payment</a>
+            <a href="reviews.html" class="nav-item"><i class="fas fa-star"></i> Reviews</a>
+            <a href="contact.html" class="nav-item"><i class="fas fa-envelope"></i> Contact Us</a>
+        </nav>
+    </header>
+    <main>
+        <!-- Smart Review Form -->
+        <form id="smart-review-form" method="POST" class="review-form">
+            {% csrf_token %}
+            <div class="input-container">
+                <i class="fas fa-user"></i>
+                <input type="text" name="name" placeholder="Your Name" required>
+            </div>
+            <div class="input-container">
+                <i class="fas fa-comment-alt"></i>
+                <textarea name="review" placeholder="Share your experience with us..." required></textarea>
+            </div>
+            
+            <!-- Smart Star Rating System -->
+            <div class="star-rating" id="smart-star-rating">
+                <div class="star-rating-label">Rate your experience:</div>
+                <div class="stars-container" id="stars-container">
+                    <span class="star" data-rating="1">★</span>
+                    <span class="star" data-rating="2">★</span>
+                    <span class="star" data-rating="3">★</span>
+                    <span class="star" data-rating="4">★</span>
+                    <span class="star" data-rating="5">★</span>
+                </div>
+                <input type="hidden" name="stars" id="stars-input" value="0">
+                <div class="star-value-display" id="star-value-display">Select your rating</div>
+            </div>
+            
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-paper-plane"></i> Submit Review
+            </button>
+        </form>
+
+        <!-- Smart Review Carousel -->
+        <div class="review-carousel-container">
+            <div class="review-carousel" id="review-carousel">
+                {% for review in reviews %}
+                <div class="review-card">
+                    <div class="review-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="review-stars">
+                        {% for i in "12345"|make_list %}
+                            <span class="star {% if forloop.counter <= review.stars %}filled{% endif %}">★</span>
+                        {% endfor %}
+                    </div>
+                    <div class="review-text">"{{ review.text }}"</div>
+                    <div class="reviewer-name">– {{ review.reviewer_name }}</div>
+                    <div class="review-date">{{ review.created_at|date:"M d, Y" }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Carousel Navigation -->
+            <div class="carousel-nav">
+                <button class="carousel-btn" id="prev-btn" onclick="moveCarousel(-1)">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="carousel-btn" id="next-btn" onclick="moveCarousel(1)">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <!-- Carousel Dots -->
+            <div class="carousel-dots" id="carousel-dots">
+                <!-- Dots will be generated by JavaScript -->
+            </div>
+        </div>
+    </main>
+    <footer class="footer-top">
+        <!-- Footer Main Container -->
+        <div class="footer-container">
+            <!-- Left Section: Company Info -->
+            <div class="footer-left">
+                <h3><i class="fas fa-building"></i> Master Pro Dev</h3>
+                <p class="encapsulated green1"><i class="fas fa-rocket"></i> Elevating Your Professional Journey</p>
+                <p class="encapsulated blue"><i class="fas fa-map-marker-alt"></i> Toronto, ON, Canada</p>
+            </div>
+    
+            <!-- Divider -->
+            <div class="footer-divider"></div>
+    
+            <!-- Center Section: Contact Info -->
+            <div class="footer-center">
+                <h3><i class="fas fa-phone-alt"></i> Contact Us</h3>
+                
+                <p class="encapsulated gold">
+                    <i class="fas fa-phone"></i> <a href="tel:+16476317328"></a>
+                </p>
+                <p class="encapsulated blue">
+                    <i class="fas fa-envelope"></i> 
+                    <a style="color: #fff;" href="mailto:srivardhanmuthyala111@gmail.com">srivardhanmuthyala111@gmail.com</a>
+                </p>
+                <p class="encapsulated green">
+                    <i class="fas fa-envelope"></i> 
+                    <a style="color: #fff;" href="mailto:masterprodevconsultant@outlook.com">masterprodevconsultant@outlook.com</a>
+                </p>
+            </div>
+    
+            <!-- Divider -->
+            <div class="footer-divider"></div>
+    
+            <!-- Right Section: Social Media -->
+            <div class="footer-right">
+                <h3><i class="fas fa-share-alt"></i> Follow Us</h3>
+                <div class="social-links">
+                    <a href="https://www.facebook.com/" class="fab fa-facebook-f"></a>
+                    <a href="https://www.twitter.com/" class="fab fa-twitter"></a>
+                    <a href="https://www.linkedin.com/in/srivardhan-ai-pm/" class="fab fa-linkedin-in"></a>
+                    <a href="https://www.instagram.com/masterprodev2025/" class="fab fa-instagram"></a>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Bottom Copyright Section -->
+        <div class="footer-bottom">
+            <p class="encapsulated gold">© 2024 Master Pro Dev. All Rights Reserved.</p>
+        </div>
+    </footer>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Smart Star Rating System
+        document.addEventListener('DOMContentLoaded', function() {
+            const stars = document.querySelectorAll('.star[data-rating]');
+            const starsInput = document.getElementById('stars-input');
+            const starValueDisplay = document.getElementById('star-value-display');
+            let currentRating = 0;
+
+            // Star rating functionality
+            stars.forEach(star => {
+                star.addEventListener('mouseenter', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    highlightStars(rating);
+                    updateStarDisplay(rating);
+                });
+
+                star.addEventListener('mouseleave', function() {
+                    highlightStars(currentRating);
+                    updateStarDisplay(currentRating);
+                });
+
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    currentRating = rating;
+                    starsInput.value = rating;
+                    highlightStars(rating);
+                    updateStarDisplay(rating);
+                    
+                    // Add animation effect
+                    this.style.transform = 'scale(1.3)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 200);
+                });
+            });
+
+            function highlightStars(rating) {
+                stars.forEach((star, index) => {
+                    if (index < rating) {
+                        star.classList.add('filled', 'hover');
+                    } else {
+                        star.classList.remove('filled', 'hover');
+                    }
+                });
+            }
+
+            function updateStarDisplay(rating) {
+                if (rating === 0) {
+                    starValueDisplay.textContent = 'Select your rating';
+                } else {
+                    const descriptions = {
+                        1: 'Poor - 1 Star',
+                        2: 'Fair - 2 Stars', 
+                        3: 'Good - 3 Stars',
+                        4: 'Very Good - 4 Stars',
+                        5: 'Excellent - 5 Stars'
+                    };
+                    starValueDisplay.textContent = descriptions[rating];
+                }
+            }
+
+            // Form submission with AJAX
+            const reviewForm = document.getElementById('smart-review-form');
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    if (currentRating === 0) {
+                        alert('Please select a rating before submitting.');
+                        return;
+                    }
+
+                    const formData = new FormData(this);
+                    
+                    fetch('{% url "reviews" %}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        // Update carousel with new review
+                        updateCarousel(html);
+                        
+                        // Reset form
+                        reviewForm.reset();
+                        currentRating = 0;
+                        highlightStars(0);
+                        updateStarDisplay(0);
+                        
+                        // Show success message
+                        showNotification('Review submitted successfully!', 'success');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Error submitting review. Please try again.', 'error');
+                    });
+                });
+            }
+        });
+
+        // Carousel functionality
+        let currentSlide = 0;
+        const carousel = document.getElementById('review-carousel');
+        const cards = document.querySelectorAll('.review-card');
+        const totalSlides = Math.ceil(cards.length / 3); // Show 3 cards at a time
+        let autoPlayInterval;
+
+        function initializeCarousel() {
+            if (cards.length === 0) return;
+            
+            // Create dots
+            const dotsContainer = document.getElementById('carousel-dots');
+            dotsContainer.innerHTML = '';
+            
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'carousel-dot';
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => goToSlide(i));
+                dotsContainer.appendChild(dot);
+            }
+            
+            updateCarouselButtons();
+            startAutoPlay();
+        }
+
+        function moveCarousel(direction) {
+            currentSlide += direction;
+            
+            if (currentSlide < 0) {
+                currentSlide = totalSlides - 1;
+            } else if (currentSlide >= totalSlides) {
+                currentSlide = 0;
+            }
+            
+            updateCarousel();
+        }
+
+        function goToSlide(slideIndex) {
+            currentSlide = slideIndex;
+            updateCarousel();
+        }
+
+        function updateCarousel() {
+            const translateX = -currentSlide * (100 / totalSlides);
+            carousel.style.transform = `translateX(${translateX}%)`;
+            
+            // Update dots
+            document.querySelectorAll('.carousel-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide);
+            });
+            
+            updateCarouselButtons();
+        }
+
+        function updateCarouselButtons() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            
+            if (prevBtn && nextBtn) {
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === totalSlides - 1;
+            }
+        }
+
+        function startAutoPlay() {
+            autoPlayInterval = setInterval(() => {
+                moveCarousel(1);
+            }, 5000); // Auto-advance every 5 seconds
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+            }
+        }
+
+        // Pause auto-play on hover
+        if (carousel) {
+            carousel.addEventListener('mouseenter', stopAutoPlay);
+            carousel.addEventListener('mouseleave', startAutoPlay);
+        }
+
+        function updateCarousel(html) {
+            // Parse the new HTML and add to carousel
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = html;
+            const newCards = tempDiv.querySelectorAll('.review-card');
+            
+            newCards.forEach(card => {
+                carousel.appendChild(card);
+            });
+            
+            // Reinitialize carousel
+            initializeCarousel();
+        }
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                background: ${type === 'success' ? '#00bf63' : '#ff6b6b'};
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize carousel when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCarousel();
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function syncWelcomeSectionHeight() {
+    let s1 = document.getElementById("welcomeId"); // Welcome Section
+    let div = document.querySelector(".image-box-welcome"); // Corresponding Image Box
+
+    if (s1 && div) {
+        div.style.height = `${s1.offsetHeight}px`; // Set DIV's height to match Welcome Section
+    }
+}
+
+// Run the function on page load and window resize
+window.onload = syncWelcomeSectionHeight;
+window.onresize = syncWelcomeSectionHeight;
+
+
+    </script>
+</body>
+</html>
