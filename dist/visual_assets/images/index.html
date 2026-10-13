@@ -1,0 +1,662 @@
+
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Pro Dev - Professional Services</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header-box">
+        <div class="header-container">
+            <!-- Left Side - Logo -->
+            <div class="logo-container">
+                <img src="{% static 'Logo.svg' %}" alt="Master Pro Dev Logo" class="logo">
+            </div>
+    
+            <!-- Center - Company Name & Tagline -->
+            <div class="company-info">
+                <!-- Multi-Color Brand Name -->
+                <h1 class="company-name">
+                    <span class="brand-word-1">Master</span>
+                    <span class="brand-word-2">Pro</span>
+                    <span class="brand-word-3">Dev</span>
+                </h1>
+            
+                <!-- Tagline with Impactful Words -->
+                <p class="company-tagline">
+                    Where Profiles Shine 🌄 , Brands Rise 🏔️ and Opportunities Align 🌟
+                </p>
+            
+                <!-- Marquee for Dynamic Engagement -->
+                <div class="marquee-box">
+                    <marquee class="marquee-text" behavior="scroll" direction="left">
+                        🚀 Magnetize Attention | 🎯 Amplify Your Presence | 🌟 Elevate to Excellence | 💡 Shine Bright & Stand Out | 🔥 Command the Spotlight! 🚀
+                    </marquee>
+                </div>
+            </div>
+            
+    
+            <!-- Right Side - Additional Graphic -->
+            <div class="graphic-container">
+                <video class="graphic-image" autoplay loop muted playsinline>
+                    <source src="{% static '/Final_video.mp4'%}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            
+        </div>
+    
+        <!-- Navigation Bar -->
+        <nav class="nav-container">
+            <a href="#" class="nav-item"><i class="fas fa-home"></i> Home</a>
+            <a href="about.html" class="nav-item"><i class="fas fa-info-circle"></i> About Us</a>
+            <a href="services.html" class="nav-item"><i class="fas fa-cogs"></i> Services</a>
+            <a href="consultants.html" class="nav-item"><i class="fas fa-users"></i> Consultants</a>
+            <a href="payment.html" class="nav-item"><i class="fas fa-credit-card"></i> Payment</a>
+            <a href="reviews.html" class="nav-item"><i class="fas fa-star"></i> Reviews</a>
+            <a href="contact.html" class="nav-item"><i class="fas fa-envelope"></i> Contact Us</a>
+        </nav>
+    </header>
+    
+
+    <main>
+        
+       <!-- Welcome Section -->
+    <div class="section-wrapperwelcome" id="wid">
+        <section id="welcomeId" class="section-container welcome-section">
+            <h2 class="section-title welcome-title"><i class="fas fa-sun"></i> Welcome</h2>
+            <div class="text-box">
+                <p>Welcome to <strong>Master Pro Dev</strong> — your AI-powered professional services hub. We help professionals, entrepreneurs, and businesses thrive with cutting-edge solutions in <strong>AI Consulting</strong>, <strong>AI Digital Marketing & Business Development</strong>, <strong>AI Profile Designing</strong>, <strong>AI Agents & Chatbots</strong>, and <strong>AI-Powered Job & Client Hunting</strong>.  \n                 Empower your growth, modernize your brand, and win new opportunities with AI-driven innovation. Let's shape your future together.</p>
+            </div>
+        </section>
+        <div class="image-box-welcome">
+            <img src="{% static 'welcome.svg' %}" alt="Video/Image for Welcome" class="framed-image">
+        </div>
+    </div>
+
+    <!-- About Us Section -->
+    <div class="section-wrapperwelcome" id="abid">
+        <div class="image-box-welcome">
+            <img src="{% static 'about-us.svg' %}" alt="Video/Image for About Us" class="framed-image">
+        </div>
+        <section id="aboutId" class="section-container about-section">
+            <h2 class="section-title about-title">About Us</h2>
+            <div class="text-box">
+                <p>At "Master Pro Dev", we are pioneers in AI-powered professional services. Our mission is to revolutionize how businesses and professionals operate through cutting-edge AI solutions. We specialize in AI consulting, automation, chatbots, business development, and AI-enhanced career services. We ensure every client receives innovative AI-driven solutions to accelerate growth and achieve unprecedented success.</p>
+            </div>
+        </section>
+    </div>
+        <!-- Services Section -->
+        <div class="section-wrapper">
+            <section id="services" class="services-section section-container">
+                <h2 class="section-title services-title">
+                    <i class="fas fa-cogs"></i> Our Services
+                </h2>
+                <div class="services-grid">
+        
+                    <!-- AI Consulting Services -->
+                    <div class="card ai-service-card">
+                        <h3 style="color: #5271ff;"><i class="fas fa-brain"></i> AI Consulting</h3>
+                        <img src="https://via.placeholder.com/150" alt="AI Consulting">
+                        <p>Strategic AI implementation consulting to transform your business operations and drive innovation.</p>
+                        <button class="btn-primary" style="background-color: #5271ff;">Learn More</button>
+                    </div>
+                    
+                    <!-- AI Agents & Automations -->
+                    <div class="card ai-service-card">
+                        <h3 style="color: #00bf63;"><i class="fas fa-robot"></i> AI Agents & Automations</h3>
+                        <img src="https://via.placeholder.com/150" alt="AI Agents & Automations">
+                        <p>Custom AI agents and automation solutions to streamline workflows and boost productivity.</p>
+                        <button class="btn-primary" style="background-color: #00bf63;">Learn More</button>
+                    </div>
+                    
+                    <!-- AI Optimized Chatbots & Support -->
+                    <div class="card ai-service-card">
+                        <h3 style="color: #ffb400;"><i class="fas fa-comments"></i> AI Optimized Chatbots & Support Systems</h3>
+                        <img src="https://via.placeholder.com/150" alt="AI Chatbots & Support">
+                        <p>Intelligent chatbots and customer support systems powered by advanced AI technology.</p>
+                        <button class="btn-primary" style="background-color: #ffb400;">Learn More</button>
+                    </div>
+                    
+                    <!-- AI Powered Business Development -->
+                    <div class="card ai-service-card">
+                        <h3 style="color: #d939b4;"><i class="fas fa-chart-line"></i> AI Powered Business Development</h3>
+                        <img src="https://via.placeholder.com/150" alt="AI Business Development">
+                        <p>AI-driven business growth strategies, market analysis, and development solutions.</p>
+                        <button class="btn-primary" style="background-color: #d939b4;">Learn More</button>
+                    </div>
+                    
+                    <!-- AI Powered Job Search & Professional Development -->
+                    <div class="card ai-service-card">
+                        <h3 style="color: #ff5722;"><i class="fas fa-search"></i> AI Powered Job Search & Professional Development</h3>
+                        <img src="https://via.placeholder.com/150" alt="AI Job Search">
+                        <p>AI-enhanced job hunting, career optimization, and professional development strategies.</p>
+                        <button class="btn-primary" style="background-color: #ff5722;">Learn More</button>
+                    </div>
+        
+                </div>
+            </section>
+        </div>
+        
+        
+        
+        
+        <!-- Consultants Section -->
+        <div class="section-wrapper">
+            <section id="consultants" class="consultants-section section-container">
+                <h2 class="section-title consultants-title">
+                    <i class="fas fa-users"></i> Our Consultants
+                </h2>
+                <div class="services-grid">
+                    <!-- Repeat Operation for 9 Consultant Cards -->
+                    <script>
+                        const consultants = [
+                                    { 
+                                        name: "AI Strategy Consultant", 
+                                        icon: "fa-brain", 
+                                        services: [
+                                            { name: "AI Implementation", icon: "fa-robot" }, 
+                                            { name: "AI Strategy Planning", icon: "fa-chart-line" }, 
+                                            { name: "Business Process AI", icon: "fa-cogs" }, 
+                                            { name: "AI ROI Analysis", icon: "fa-calculator" }
+                                        ], 
+                                        exp: "8", 
+                                        borderColor: "#5271ff" 
+                                    },
+                                    { 
+                                        name: "AI Automation Specialist", 
+                                        icon: "fa-robot", 
+                                        services: [
+                                            { name: "AI Agents Development", icon: "fa-robot" }, 
+                                            { name: "Process Automation", icon: "fa-cogs" }, 
+                                            { name: "Workflow Optimization", icon: "fa-stream" }, 
+                                            { name: "AI Integration", icon: "fa-plug" }
+                                        ], 
+                                        exp: "6", 
+                                        borderColor: "#00bf63" 
+                                    },
+                                    { 
+                                        name: "AI Chatbot Expert", 
+                                        icon: "fa-comments", 
+                                        services: [
+                                            { name: "Chatbot Development", icon: "fa-comments" }, 
+                                            { name: "AI Support Systems", icon: "fa-headset" }, 
+                                            { name: "Natural Language Processing", icon: "fa-language" }, 
+                                            { name: "Customer Experience AI", icon: "fa-smile" }
+                                        ], 
+                                        exp: "7", 
+                                        borderColor: "#ffb400" 
+                                    },
+                                    { 
+                                        name: "AI Business Development Specialist", 
+                                        icon: "fa-chart-line", 
+                                        services: [
+                                            { name: "AI Market Analysis", icon: "fa-chart-line" }, 
+                                            { name: "AI Growth Strategies", icon: "fa-rocket" }, 
+                                            { name: "AI Business Intelligence", icon: "fa-chart-bar" }, 
+                                            { name: "AI Revenue Optimization", icon: "fa-dollar-sign" }
+                                        ], 
+                                        exp: "5", 
+                                        borderColor: "#d939b4" 
+                                    },
+                                    { 
+                                        name: "AI Career Development Expert", 
+                                        icon: "fa-search", 
+                                        services: [
+                                            { name: "AI Job Matching", icon: "fa-search" }, 
+                                            { name: "AI Career Planning", icon: "fa-chart-line" }, 
+                                            { name: "AI Skill Assessment", icon: "fa-graduation-cap" }, 
+                                            { name: "AI Professional Branding", icon: "fa-user-tag" }
+                                        ], 
+                                        exp: "10", 
+                                        borderColor: "#ee8d0f" 
+                                    },
+                                    { 
+                                        name: "AI Project Manager", 
+                                        icon: "fa-tasks", 
+                                        services: [
+                                            { name: "AI Project Planning", icon: "fa-tasks" }, 
+                                            { name: "AI Team Management", icon: "fa-users" }, 
+                                            { name: "AI Risk Assessment", icon: "fa-shield-alt" }, 
+                                            { name: "AI Performance Analytics", icon: "fa-chart-pie" }
+                                        ], 
+                                        exp: "9", 
+                                        borderColor: "#ff0000" 
+                                    },
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "Social Media Strategies", icon: "fa-hashtag" }, 
+                                            { name: "Online Presence", icon: "fa-globe" }, 
+                                            { name: "Brand Growth", icon: "fa-bullhorn" }, 
+                                            { name: "Engagement", icon: "fa-heart" }
+                                        ], 
+                                        exp: "6", 
+                                        borderColor: "#009688" 
+                                    },
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "PowerPoint Design", icon: "fa-file-powerpoint" }, 
+                                            { name: "Storytelling Techniques", icon: "fa-book-open" }, 
+                                            { name: "Public Speaking", icon: "fa-microphone" }, 
+                                            { name: "Visual Aids", icon: "fa-project-diagram" }
+                                        ], 
+                                        exp: "4", 
+                                        borderColor: "#7d3cff" 
+                                    },
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "Graphic Design", icon: "fa-palette" }, 
+                                            { name: "Poster Creation", icon: "fa-image" }, 
+                                            { name: "Marketing Materials", icon: "fa-ad" }, 
+                                            { name: "Print & Digital", icon: "fa-print" }
+                                        ], 
+                                        exp: "5", 
+                                        borderColor: "#ff6600" 
+                                    }
+                                ];
+
+
+        
+                        consultants.forEach((consultant, index) => {
+                            document.write(`
+                                <div class="consultant-card" style="border: 2px solid ${consultant.borderColor};">
+                                    <div class="consultant-header" style="color: ${consultant.borderColor};">
+                                        <i class="fas ${consultant.icon}" style="color: ${consultant.borderColor};"></i>
+                                        <p>${consultant.name} <span class="consultant-number">${index + 1}</span></p>
+                                    </div>
+                                    <div class="consultant-image">
+                                        <img src="https://via.placeholder.com/150" alt="${consultant.name}">
+                                    </div>
+                                    <div class="consultant-services">
+                                        <p class="services-title-consultantcard" style="background: ${consultant.borderColor};">
+                                            <i class="fas fa-tools"></i> Services Offered
+                                        </p>
+                                        <div class="service-grid">
+                                        ${consultant.services.map(service => `
+                                            <span class="service-pill">
+                                                <i class="fas ${service.icon}"></i> ${service.name}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                    </div>
+                                    <div class="consultant-contact">
+                                        <button class="exp-btn">
+                                            <p><i class="fas fa-hourglass-half"></i> Years of Exp: <span class="exp-years">${consultant.exp}</span></p>
+                                        </button>
+                                    </div>
+                                    <div class="consultant-contact">
+                                        <button class="contact-btn" style="background: ${consultant.borderColor};">
+                                            <i class="fas fa-envelope"></i> Contact
+                                        </button>
+                                    </div>
+                                </div>
+                            `);
+                        });
+                    </script>
+                </div>
+            </section>
+        </div>
+        
+        
+        <!---->
+
+        
+
+        <!-- Payment Section -->
+        <div class="section-wrapper">
+            <section id="payment" class="payments-section section-container">
+                <h2 class="section-title payments-title">
+                    <i class="fas fa-credit-card"></i> Flexible & Secure Payment Methods
+                </h2>
+                <p>
+                    <i class="fas fa-wallet" style="color: #ff9800;"></i> We offer a variety of <strong>secure payment options</strong>, including  
+                    <i class="fas fa-credit-card" style="color: #5271ff;"></i> <strong>Credit & Debit Cards</strong>,  
+                    <i class="fab fa-paypal" style="color: #00bf63;"></i> <strong>PayPal</strong>,  
+                    <i class="fab fa-google-pay" style="color: #ff5722;"></i> <strong>Google Pay</strong>,  
+                    <i class="fab fa-apple" style="color: #d939b4;"></i> <strong>Apple Pay</strong>,  
+                    <i class="fab fa-bitcoin" style="color: #ffb400;"></i> <strong>Cryptocurrency</strong>,  
+                    <i class="fas fa-globe" style="color: #009688;"></i> <strong>Global Currencies</strong>,  
+                    <i class="fas fa-gem" style="color: #795548;"></i> <strong>Precious Metals</strong>, and  
+                    <i class="fas fa-chart-line" style="color: #7d3cff;"></i> <strong>Investment-based Transactions</strong>.  
+                    Our payment solutions ensure <strong>flexibility, security, and convenience</strong> for every user.
+                </p>
+                <div class="payment-grid" id="payment-container">
+                    <script>
+                        const paymentMethods = [
+                            { name: "Credit & Debit Cards", icon: "fa-credit-card", desc: "Fast and secure Visa, MasterCard, and Amex payments.", button: "Pay Now", borderColor: "#5271ff" },
+                            { name: "PayPal", logo: "https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg", desc: "Safe transactions with PayPal balance or linked bank accounts.", button: "Pay Now", borderColor: "#00bf63" },
+                            { name: "Google Pay", icon: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Google_Pay_Logo.svg", desc: "Instant payments with Google Pay.", button: "Pay Now", borderColor: "#ffb400" },
+                            { name: "Apple Pay", icon:"https://upload.wikimedia.org/wikipedia/commons/3/30/Apple_Pay_logo.svg", desc: "Fast and secure Apple Pay transactions.", button: "Pay Now", borderColor: "#d939b4" },
+                            { name: "Cryptocurrency", logo: "https://upload.wikimedia.org/wikipedia/commons/4/46/Bitcoin.svg", desc: "We accept Bitcoin, Ethereum, USDT, and major altcoins.", button: "Pay with Crypto", borderColor: "#ee8d0f" },
+                            { name: "Global Currencies", icon: "fa-globe", desc: "Pay in USD, EUR, GBP, JPY, CAD, and top world currencies.", button: "Pay in Currency", borderColor: "#ff0000" },
+                            { name: "Precious Metals", icon: "fa-gem", desc: "We accept payments in Gold, Silver, and Platinum.", button: "Pay with Metals", borderColor: "#009688" },
+                            { name: "Investment & Equity", icon: "fa-chart-line", desc: "Partner with us via stocks, equity, or investment deals.", button: "Discuss Investment", borderColor: "#7d3cff" }
+                        ];
+                
+                        const container = document.getElementById("payment-container");
+                
+                        paymentMethods.forEach((method) => {
+                            const card = `
+                                <div class="payment-card" style="border: 2px solid ${method.borderColor}; text-align: center;">
+                                    <h3 style="color: ${method.borderColor}; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                        ${method.logo ? `<img src="${method.logo}" alt="${method.name}" style="width: 40px; height: auto;">` : `<i class="fas ${method.icon}" style="color: ${method.borderColor}; font-size: 24px;"></i>`}
+                                        ${method.name}
+                                    </h3>
+                                    <p>${method.desc}</p>
+                                    <button class="btn-primary" style="background: ${method.borderColor}; color: white; border: 2px solid ${method.borderColor}; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                        <i class="fas fa-shopping-cart"></i> ${method.button}
+                                    </button>
+                                </div>
+                            `;
+                            container.innerHTML += card;
+                        });
+                    </script>
+                </div>
+                
+                
+                
+                <br>
+                <br>
+                <div class="secure-transaction-box">
+                    <div class="secure-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="secure-content">
+                        <h3>Secure Transactions</h3>
+                        <p>All transactions are <span class="highlight">encrypted</span> & <span class="highlight">protected</span> with industry-leading security measures.</p>
+                        <div class="security-badges">
+                            <div class="badge">
+                                <i class="fas fa-lock"></i> <span>SSL Secure</span>
+                            </div>
+                            <div class="badge">
+                                <i class="fas fa-shield-check"></i> <span>PCI Compliance</span>
+                            </div>
+                            <div class="badge">
+                                <i class="fas fa-credit-card"></i> <span>Trusted Payment</span>
+                            </div>
+                            <div class="badge">
+                                <i class="fas fa-user-shield"></i> <span>Fraud Protection</span>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+                
+            </section>
+        </div>
+        
+        
+        
+        
+
+        
+
+   <!-- Reviews Section -->
+<!-- Reviews Section -->
+<div class="section-wrapper">
+    <section class="section-container review-section">
+        <h2 class="section-title review-title">What Our Clients Say</h2>
+        <div class="review-container">
+            <div class="review-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p>"The resume service helped me land my dream job!"</p>
+                <p class="reviewer-name">– Alex</p>
+            </div>
+            <div class="review-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p>"Excellent customer support and professional results."</p>
+                <p class="reviewer-name">– Sarah</p>
+            </div>
+            <div class="review-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p>"I received a high-quality portfolio that boosted my career!"</p>
+                <p class="reviewer-name">– Michael</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+
+        <!-- Contact Section -->
+        <div class="section-wrapper">
+            <section class="section-container contact-section">
+                <!-- Section Title with Icon -->
+
+                <h2 class="contact-title section-title">
+                    <i class="fas fa-envelope"></i> Contact Us
+                </h2>
+               <br>
+                
+        
+                <!-- Contact Form -->
+                <form>
+                    <div class="input-container">
+                        <i class="fas fa-user"></i>
+                        <input type="text" placeholder="Your Name" required>
+                    </div>
+        
+                    <div class="input-container">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" placeholder="Your Email" required>
+                    </div>
+        
+                    <div class="input-container">
+                        <i class="fas fa-comment-alt"></i>
+                        <textarea placeholder="Your Message" required></textarea>
+                    </div>
+        
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </form>
+        
+                <!-- Social Media Icons -->
+                <div class="contact-icons">
+                    <a href="#" class="social-btn facebook" title="Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="social-btn twitter" title="Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="social-btn linkedin" title="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="#" class="social-btn instagram" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+                    <!-- Contact Info -->
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt" style="color: #ff4d4d;"></i> 1234 Business Street, Toronto, ON</p>
+                        <p>
+                            <i class="fas fa-phone-alt" style="color: #ff4d4d;"></i> 
+                            <a href="tel:+16476317328" class="contact-link">+1 (647) 631-7328</a>
+                        </p>
+                        <p>
+                            <i class="fas fa-envelope" style="color: #5271ff;"></i> 
+                            <a href="mailto:srivardhanmuthyala111@gmail.com" class="contact-link">srivardhanmuthyala111@gmail.com</a>
+                            <span> | </span>
+                            <a href="mailto:masterprodevconsultant@outlook.com" class="contact-link">masterprodevconsultant@outlook.com</a>
+                        </p>
+                    </div>
+            </section>
+        </div>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-top">
+        <!-- Footer Main Container -->
+        <div class="footer-container">
+            <!-- Left Section: Company Info -->
+            <div class="footer-left">
+                <h3><i class="fas fa-building"></i> Master Pro Dev</h3>
+                <p class="encapsulated green1"><i class="fas fa-rocket"></i> Elevating Your Professional Journey</p>
+                <p class="encapsulated blue"><i class="fas fa-map-marker-alt"></i> Toronto, ON, Canada</p>
+            </div>
+    
+            <!-- Divider -->
+            <div class="footer-divider"></div>
+    
+            <!-- Center Section: Contact Info -->
+            <div class="footer-center">
+                <h3><i class="fas fa-phone-alt"></i> Contact Us</h3>
+                
+                <p class="encapsulated gold">
+                    <i class="fas fa-phone"></i> <a href="tel:+16476317328"></a>
+                </p>
+                <p class="encapsulated blue">
+                    <i class="fas fa-envelope"></i> 
+                    <a style="color: #fff;" href="mailto:srivardhanmuthyala111@gmail.com">srivardhanmuthyala111@gmail.com</a>
+                </p>
+                <p class="encapsulated green">
+                    <i class="fas fa-envelope"></i> 
+                    <a style="color: #fff;" href="mailto:masterprodevconsultant@outlook.com">masterprodevconsultant@outlook.com</a>
+                </p>
+            </div>
+    
+            <!-- Divider -->
+            <div class="footer-divider"></div>
+    
+            <!-- Right Section: Social Media -->
+            <div class="footer-right">
+                <h3><i class="fas fa-share-alt"></i> Follow Us</h3>
+                <div class="social-links">
+                    <a href="https://www.facebook.com/" class="fab fa-facebook-f"></a>
+                    <a href="https://www.twitter.com/" class="fab fa-twitter"></a>
+                    <a href="https://www.linkedin.com/in/srivardhan-ai-pm/" class="fab fa-linkedin-in"></a>
+                    <a href="https://www.instagram.com/masterprodev2025/" class="fab fa-instagram"></a>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Bottom Copyright Section -->
+        <div class="footer-bottom">
+            <p class="encapsulated gold">© 2024 Master Pro Dev. All Rights Reserved.</p>
+        </div>
+    </footer>
+    
+    
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Sync welcome section height
+        function syncWelcomeSectionHeight() {
+            let s1 = document.getElementById("welcomeId");
+            let div = document.querySelector(".image-box-welcome");
+
+            if (s1 && div) {
+                div.style.height = `${s1.offsetHeight}px`;
+            }
+        }
+
+        // Animate elements on scroll
+        function animateOnScroll() {
+            const elements = document.querySelectorAll('.card, .consultant-card, .payment-card, .review-card');
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('animate-in');
+                }
+            });
+        }
+
+        // Add hover effects to cards
+        function addCardHoverEffects() {
+            const cards = document.querySelectorAll('.card, .consultant-card, .payment-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                    this.style.boxShadow = '0 20px 40px rgba(0,0,0,0.15)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                    this.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+                });
+            });
+        }
+
+        // Add loading animation
+        function addLoadingAnimation() {
+            const sections = document.querySelectorAll('.section-container');
+            
+            sections.forEach((section, index) => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    section.style.transition = 'all 0.8s ease';
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        }
+
+        // Add business metrics animation
+        function animateBusinessMetrics() {
+            const metrics = document.querySelectorAll('.encapsulated');
+            metrics.forEach((metric, index) => {
+                setTimeout(() => {
+                    metric.style.animation = 'pulse 2s infinite';
+                }, index * 300);
+            });
+        }
+
+        // Add interactive elements
+        function addInteractiveElements() {
+            // Add click effects to buttons
+            const buttons = document.querySelectorAll('.btn-primary, .contact-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Create ripple effect
+                    const ripple = document.createElement('span');
+                    ripple.style.position = 'absolute';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.background = 'rgba(255,255,255,0.3)';
+                    ripple.style.transform = 'scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    ripple.style.left = e.clientX - this.offsetLeft + 'px';
+                    ripple.style.top = e.clientY - this.offsetTop + 'px';
+                    
+                    this.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+        }
+
+        // Initialize all animations
+        window.onload = function() {
+            syncWelcomeSectionHeight();
+            addCardHoverEffects();
+            addLoadingAnimation();
+            animateBusinessMetrics();
+            addInteractiveElements();
+        };
+        
+        window.onresize = syncWelcomeSectionHeight;
+        window.onscroll = animateOnScroll;
+    </script>
+</body>
+</html>

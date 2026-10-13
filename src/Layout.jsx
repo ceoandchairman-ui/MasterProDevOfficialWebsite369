@@ -166,7 +166,7 @@ export default function Layout({ children, currentPageName }) {
                                   <Link to={createPageUrl('Home')} className="flex items-center space-x-3 flex-shrink-0 hover:opacity-80 transition-opacity">
                                                                             <div className="w-10 h-10 flex-shrink-0">
                                                                               <img
-                                                                                src="./visual_assets/images/Logo.svg"
+                                                                                src="/visual_assets/images/Logo.svg"
                                                                                 alt="MasterProDev Logo"
                                                                                 className="w-full h-full object-contain"
                                                                               />

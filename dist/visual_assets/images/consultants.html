@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Pro Dev - Professional Services</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="testing-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="header-box">
+        <div class="header-container">
+            <!-- Left Side - Logo -->
+            <div class="logo-container">
+                <img src="Logo.jpg" alt="Master Pro Dev Logo" class="logo">
+            </div>
+    
+            <!-- Center - Company Name & Tagline -->
+            <div class="company-info">
+                <!-- Multi-Color Brand Name -->
+                <h1 class="company-name">
+                    <span class="brand-word-1">Master</span>
+                    <span class="brand-word-2">Pro</span>
+                    <span class="brand-word-3">Dev</span>
+                </h1>
+            
+                <!-- Tagline with Impactful Words -->
+                <p class="company-tagline">
+                    Where Profiles Shine 🌄 , Brands Rise 🏔️ and Opportunities Align 🌟
+                </p>
+            
+                <!-- Marquee for Dynamic Engagement -->
+                <div class="marquee-box">
+                    <marquee class="marquee-text" behavior="scroll" direction="left">
+                        🚀 Magnetize Attention | 🎯 Amplify Your Presence | 🌟 Elevate to Excellence | 💡 Shine Bright & Stand Out | 🔥 Command the Spotlight! 🚀
+                    </marquee>
+                </div>
+            </div>
+            
+    
+            <!-- Right Side - Additional Graphic -->
+            <div class="graphic-container">
+                <video class="graphic-image" autoplay loop muted playsinline>
+                    <source src="E:/Master_Pro_Dev_Copy/MasterProDev-master/animations/Final_video.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            
+        </div>
+    
+        <!-- Navigation Bar -->
+        <nav class="nav-container">
+            <a href="#" class="nav-item"><i class="fas fa-home"></i> Home</a>
+            <a href="about.html" class="nav-item"><i class="fas fa-info-circle"></i> About Us</a>
+            <a href="services.html" class="nav-item"><i class="fas fa-cogs"></i> Services</a>
+            <a href="consultants.html" class="nav-item"><i class="fas fa-users"></i> Consultants</a>
+            <a href="payment.html" class="nav-item"><i class="fas fa-credit-card"></i> Payment</a>
+            <a href="reviews.html" class="nav-item"><i class="fas fa-star"></i> Reviews</a>
+            <a href="contact.html" class="nav-item"><i class="fas fa-envelope"></i> Contact Us</a>
+        </nav>
+    </header>
+    <main>
+        <div class="section-wrapper">
+            <section id="consultants" class="consultants-section section-container">
+                <h2 class="section-title consultants-title" style="background-color: #5271ff; color: white;">
+                    <i class="fas fa-users" style="color: #fff;"></i> Our Consultants
+                </h2>
+                <div class="services-grid">
+                    <!-- Repeat Operation for 9 Consultant Cards -->
+                    <script>
+                        const consultants = [
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "Resume Writing", icon: "fa-file-alt" }, 
+                                            { name: "Career Coaching", icon: "fa-chalkboard-teacher" }, 
+                                            { name: "Professional Guidance", icon: "fa-briefcase" }, 
+                                            { name: "Job Market Trends", icon: "fa-chart-line" }
+                                        ], 
+                                        exp: "8", 
+                                        borderColor: "#5271ff" 
+                                    },
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "Web Development", icon: "fa-code" }, 
+                                            { name: "LinkedIn Optimization", icon: "fa-linkedin" }, 
+                                            { name: "SEO Strategies", icon: "fa-search" }, 
+                                            { name: "Profile Branding", icon: "fa-user-tag" }
+                                        ], 
+                                        exp: "6", 
+                                        borderColor: "#00bf63" 
+                                    },
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "Interview Preparation", icon: "fa-comments" }, 
+                                            { name: "Mock Interviews", icon: "fa-microphone" }, 
+                                            { name: "Soft Skills Training", icon: "fa-users" }, 
+                                            { name: "HR Insights", icon: "fa-user-check" }
+                                        ], 
+                                        exp: "7", 
+                                        borderColor: "#ffb400" 
+                                    },
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "Portfolio Design", icon: "fa-paint-brush" }, 
+                                            { name: "Personal Branding", icon: "fa-id-badge" }, 
+                                            { name: "Graphic Identity", icon: "fa-images" }, 
+                                            { name: "Website Creation", icon: "fa-laptop-code" }
+                                        ], 
+                                        exp: "5", 
+                                        borderColor: "#d939b4" 
+                                    },
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "Academic Planning", icon: "fa-graduation-cap" }, 
+                                            { name: "Career Growth", icon: "fa-chart-line" }, 
+                                            { name: "Scholarship Guidance", icon: "fa-university" }, 
+                                            { name: "Resume Building", icon: "fa-file-alt" }
+                                        ], 
+                                        exp: "10", 
+                                        borderColor: "#ee8d0f" 
+                                    },
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "Freelance Work", icon: "fa-briefcase" }, 
+                                            { name: "Project Management", icon: "fa-tasks" }, 
+                                            { name: "Client Negotiation", icon: "fa-handshake" }, 
+                                            { name: "Consulting", icon: "fa-comments-dollar" }
+                                        ], 
+                                        exp: "9", 
+                                        borderColor: "#ff0000" 
+                                    },
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "Social Media Strategies", icon: "fa-hashtag" }, 
+                                            { name: "Online Presence", icon: "fa-globe" }, 
+                                            { name: "Brand Growth", icon: "fa-bullhorn" }, 
+                                            { name: "Engagement", icon: "fa-heart" }
+                                        ], 
+                                        exp: "6", 
+                                        borderColor: "#009688" 
+                                    },
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "PowerPoint Design", icon: "fa-file-powerpoint" }, 
+                                            { name: "Storytelling Techniques", icon: "fa-book-open" }, 
+                                            { name: "Public Speaking", icon: "fa-microphone" }, 
+                                            { name: "Visual Aids", icon: "fa-project-diagram" }
+                                        ], 
+                                        exp: "4", 
+                                        borderColor: "#7d3cff" 
+                                    },
+                                    { 
+                                        name: "Consultant Name", 
+                                        icon: "fa-user-tie", 
+                                        services: [
+                                            { name: "Graphic Design", icon: "fa-palette" }, 
+                                            { name: "Poster Creation", icon: "fa-image" }, 
+                                            { name: "Marketing Materials", icon: "fa-ad" }, 
+                                            { name: "Print & Digital", icon: "fa-print" }
+                                        ], 
+                                        exp: "5", 
+                                        borderColor: "#ff6600" 
+                                    }
+                                ];
+
+
+        
+                        consultants.forEach((consultant, index) => {
+                            document.write(`
+                                <div class="consultant-card" style="border: 2px solid ${consultant.borderColor};">
+                                    <div class="consultant-header" style="color: ${consultant.borderColor};">
+                                        <i class="fas ${consultant.icon}" style="color: ${consultant.borderColor};"></i>
+                                        <p>${consultant.name} <span class="consultant-number">${index + 1}</span></p>
+                                    </div>
+                                    <div class="consultant-image">
+                                        <img src="https://via.placeholder.com/150" alt="${consultant.name}">
+                                    </div>
+                                    <div class="consultant-services">
+                                        <p class="services-title-consultantcard" style="background: ${consultant.borderColor};">
+                                            <i class="fas fa-tools"></i> Services Offered
+                                        </p>
+                                        <div class="service-grid">
+                                        ${consultant.services.map(service => `
+                                            <span class="service-pill">
+                                                <i class="fas ${service.icon}"></i> ${service.name}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                    </div>
+                                    <div class="consultant-contact">
+                                        <button class="exp-btn">
+                                            <p><i class="fas fa-hourglass-half"></i> Years of Exp: <span class="exp-years">${consultant.exp}</span></p>
+                                        </button>
+                                    </div>
+                                    <div class="consultant-contact">
+                                        <button class="contact-btn" style="background: ${consultant.borderColor};">
+                                            <i class="fas fa-envelope"></i> Contact
+                                        </button>
+                                    </div>
+                                </div>
+                            `);
+                        });
+                    </script>
+                </div>
+            </section>
+        </div>
+    </main>
+    <footer class="footer-top">
+        <!-- Footer Main Container -->
+        <div class="footer-container">
+            <!-- Left Section: Company Info -->
+            <div class="footer-left">
+                <h3><i class="fas fa-building"></i> Master Pro Dev</h3>
+                <p class="encapsulated green1"><i class="fas fa-rocket"></i> Elevating Your Professional Journey</p>
+                <p class="encapsulated blue"><i class="fas fa-map-marker-alt"></i> Toronto, ON, Canada</p>
+            </div>
+    
+            <!-- Divider -->
+            <div class="footer-divider"></div>
+    
+            <!-- Center Section: Contact Info -->
+            <div class="footer-center">
+                <h3><i class="fas fa-phone-alt"></i> Contact Us</h3>
+                
+                <p class="encapsulated gold">
+                    <i class="fas fa-phone"></i> <a href="tel:+16476317328"></a>
+                </p>
+                <p class="encapsulated blue">
+                    <i class="fas fa-envelope"></i> 
+                    <a style="color: #fff;" href="mailto:srivardhanmuthyala111@gmail.com">srivardhanmuthyala111@gmail.com</a>
+                </p>
+                <p class="encapsulated green">
+                    <i class="fas fa-envelope"></i> 
+                    <a style="color: #fff;" href="mailto:masterprodevconsultant@outlook.com">masterprodevconsultant@outlook.com</a>
+                </p>
+            </div>
+    
+            <!-- Divider -->
+            <div class="footer-divider"></div>
+    
+            <!-- Right Section: Social Media -->
+            <div class="footer-right">
+                <h3><i class="fas fa-share-alt"></i> Follow Us</h3>
+                <div class="social-links">
+                    <a href="https://www.facebook.com/" class="fab fa-facebook-f"></a>
+                    <a href="https://www.twitter.com/" class="fab fa-twitter"></a>
+                    <a href="https://www.linkedin.com/in/srivardhan-ai-pm/" class="fab fa-linkedin-in"></a>
+                    <a href="https://www.instagram.com/masterprodev2025/" class="fab fa-instagram"></a>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Bottom Copyright Section -->
+        <div class="footer-bottom">
+            <p class="encapsulated gold">© 2024 Master Pro Dev. All Rights Reserved.</p>
+        </div>
+    </footer>
+    
+    
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function syncWelcomeSectionHeight() {
+    let s1 = document.getElementById("welcomeId"); // Welcome Section
+    let div = document.querySelector(".image-box-welcome"); // Corresponding Image Box
+
+    if (s1 && div) {
+        div.style.height = `${s1.offsetHeight}px`; // Set DIV's height to match Welcome Section
+    }
+}
+
+// Run the function on page load and window resize
+window.onload = syncWelcomeSectionHeight;
+window.onresize = syncWelcomeSectionHeight;
+
+
+    </script>
+</body>
+</html>
