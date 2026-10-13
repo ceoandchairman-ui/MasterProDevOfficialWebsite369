@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building Docker image...'
+                // Build the Docker image
+                sh 'docker build -t masterprodev .'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Testing application...'
+                // Here, you can define tests; for now, we'll just run the container
+                sh 'docker run -d -p 8080:80 masterprodev'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+                // Optionally, push to a Docker registry
+                sh 'docker tag masterprodev yourdockerhubusername/masterprodev'
+                sh 'docker push yourdockerhubusername/masterprodev'
+            }
+        }
+    }
+}
